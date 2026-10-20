@@ -8,11 +8,12 @@ import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Badge } from '../../../components/ui/Badge';
 import { AddCropModal } from '../../crops/components/AddCropModal';
+import { ArrowLeft, Sprout } from 'lucide-react-native';
 
 export function PlotDashboardScreen({ route, navigation }: any) {
   const { plotId } = route.params;
   const [addCropVisible, setAddCropVisible] = useState(false);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { colors } = useTheme();
   const { plots, crops, fetchCrops, getPlotRemainingArea } = usePlotStore();
 
@@ -31,41 +32,95 @@ export function PlotDashboardScreen({ route, navigation }: any) {
 
   return (
     <ScreenLayout>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <Text style={[styles.title, { color: colors.foreground }]}>{plot.name}</Text>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+        {/* Top Header with Back button matching FarmerLedger */}
+        <View style={styles.topBar}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={[styles.backBtn, { borderColor: colors.border, backgroundColor: colors.card }]}
+            activeOpacity={0.8}
+          >
+            <ArrowLeft color={colors.foreground} size={18} />
+          </TouchableOpacity>
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <Text style={[styles.title, { color: colors.foreground }]}>{plot.name}</Text>
+              <View style={[styles.gatBadge, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}>
+                <Text style={[styles.gatText, { color: colors.primary }]}>Gat #{plot.gatNumber}</Text>
+              </View>
+            </View>
+            <Text style={[styles.subtitle, { color: colors.mutedFg }]}>
+              {t('plotDashboardSubtitle')}
+            </Text>
+          </View>
+        </View>
 
-        <Card style={{ marginTop: 12 }}>
+        {/* Plot Specifications Card */}
+        <Card style={{ marginTop: 14 }}>
           <View style={styles.detailRow}>
             <Text style={{ color: colors.mutedFg }}>{t('gatNumber')}</Text>
-            <Text style={{ color: colors.foreground, fontWeight: '600' }}>{plot.gatNumber}</Text>
+            <Text style={{ color: colors.foreground, fontWeight: '700' }}>{plot.gatNumber}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={{ color: colors.mutedFg }}>{t('area')}</Text>
-            <Text style={{ color: colors.foreground, fontWeight: '600' }}>{plot.area} {t(plot.areaUnit)}</Text>
+            <Text style={{ color: colors.foreground, fontWeight: '700' }}>
+              {plot.area} {t(plot.areaUnit || 'acre')}
+            </Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={{ color: colors.mutedFg }}>{t('soilType')}</Text>
-            <Text style={{ color: colors.foreground, fontWeight: '600' }}>{t(plot.soilType)}</Text>
+            <Text style={{ color: colors.foreground, fontWeight: '700' }}>
+              {t(plot.soilType) || plot.soilType}
+            </Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={{ color: colors.mutedFg }}>{t('irrigationType')}</Text>
-            <Text style={{ color: colors.foreground, fontWeight: '600' }}>{plot.irrigationType}</Text>
+            <Text style={{ color: colors.foreground, fontWeight: '700' }}>{plot.irrigationType}</Text>
+          </View>
+          <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
+            <Text style={{ color: colors.mutedFg }}>{t('waterAvailability')}</Text>
+            <Text style={{ color: colors.foreground, fontWeight: '700' }}>
+              {t(plot.waterAvailability) || plot.waterAvailability}
+            </Text>
           </View>
         </Card>
 
-        <Card style={{ marginTop: 12 }}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>{t('area')} Occupancy</Text>
+        {/* Area Occupancy Progress */}
+        <Card style={{ marginTop: 14 }} padding={16}>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
+            {t('areaOccupancy')}
+          </Text>
           <View style={[styles.progressBar, { backgroundColor: colors.muted }]}>
-            <View style={[styles.progressFill, { width: `${Math.min(occupancyPercent, 100)}%`, backgroundColor: colors.primary }]} />
+            <View
+              style={[
+                styles.progressFill,
+                {
+                  width: `${Math.min(occupancyPercent, 100)}%`,
+                  backgroundColor: occupancyPercent > 100 ? colors.destructive : colors.primary,
+                },
+              ]}
+            />
           </View>
           <View style={styles.areaStats}>
-            <Text style={{ color: colors.mutedFg, fontSize: 12 }}>{t('usedArea')}: {usedArea.toFixed(2)}</Text>
-            <Text style={{ color: colors.mutedFg, fontSize: 12 }}>{t('remainingArea')}: {remaining.toFixed(2)}</Text>
+            <Text style={{ color: colors.mutedFg, fontSize: 12 }}>
+              {t('usedArea')}: <Text style={{ fontWeight: '700', color: colors.foreground }}>{usedArea.toFixed(2)}</Text>
+            </Text>
+            <Text style={{ color: colors.mutedFg, fontSize: 12 }}>
+              {t('remainingArea')}: <Text style={{ fontWeight: '700', color: colors.primary }}>{remaining.toFixed(2)}</Text>
+            </Text>
           </View>
         </Card>
 
+        {/* Crops Section Header */}
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Crops</Text>
+          <View>
+            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
+              {t('crops')} ({plotCrops.length})
+            </Text>
+            <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 2 }}>
+              {t('activeAndHarvestedCrops')}
+            </Text>
+          </View>
           <Button
             title={t('addCrop')}
             onPress={() => setAddCropVisible(true)}
@@ -75,47 +130,77 @@ export function PlotDashboardScreen({ route, navigation }: any) {
         </View>
 
         {remaining <= 0 && (
-          <Text style={{ color: colors.warning, fontSize: 12, marginBottom: 8 }}>{t('areaExceeded')}</Text>
+          <Text style={{ color: colors.warning, fontSize: 12, marginBottom: 8 }}>
+            {t('areaExceeded')}
+          </Text>
         )}
 
-        {plotCrops.map((crop) => (
-          <TouchableOpacity
-            key={crop.id}
-            onPress={() => navigation.navigate('CropDashboard', { plotId, cropId: crop.id })}
-          >
-            <Card style={{ marginBottom: 8 }}>
-              <View style={styles.cropRow}>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.cropName, { color: colors.foreground }]}>{crop.cropType} — {crop.variety}</Text>
-                  <Text style={{ color: colors.mutedFg, fontSize: 12 }}>
-                    {crop.area} {crop.areaUnit} • {t(crop.season)} • {crop.sowingDate}
-                  </Text>
+        {plotCrops.length === 0 ? (
+          <Card style={{ padding: 24, alignItems: 'center' }}>
+            <Sprout color={colors.mutedFg} size={32} />
+            <Text style={{ color: colors.mutedFg, textAlign: 'center', marginTop: 8 }}>
+              {t('noCropsInPlot')}
+            </Text>
+          </Card>
+        ) : (
+          plotCrops.map((crop) => (
+            <TouchableOpacity
+              key={crop.id}
+              onPress={() => navigation.navigate('CropDashboard', { plotId, cropId: crop.id })}
+              activeOpacity={0.8}
+            >
+              <Card style={{ marginBottom: 10 }} padding={14}>
+                <View style={styles.cropRow}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.cropName, { color: colors.foreground }]}>
+                      {crop.cropType} {crop.variety ? `— ${crop.variety}` : ''}
+                    </Text>
+                    <Text style={{ color: colors.mutedFg, fontSize: 12, marginTop: 3 }}>
+                      {crop.area} {crop.areaUnit || 'acre'} • {t(crop.season.toLowerCase()) || crop.season} • {crop.sowingDate}
+                    </Text>
+                  </View>
+                  <Badge
+                    text={t(crop.status) || crop.status}
+                    variant={
+                      crop.status === 'harvested' || crop.status === 'completed'
+                        ? 'success'
+                        : crop.status === 'flowering'
+                        ? 'warning'
+                        : 'info'
+                    }
+                  />
                 </View>
-                <Badge
-                  text={t(crop.status)}
-                  variant={crop.status === 'harvested' || crop.status === 'completed' ? 'success' : crop.status === 'flowering' ? 'warning' : 'info'}
-                />
-              </View>
-            </Card>
-          </TouchableOpacity>
-        ))}
-
-        <View style={{ height: 40 }} />
+              </Card>
+            </TouchableOpacity>
+          ))
+        )}
       </ScrollView>
 
-      <AddCropModal visible={addCropVisible} onClose={() => { setAddCropVisible(false); fetchCrops(plotId); }} plotId={plotId} />
+      <AddCropModal
+        visible={addCropVisible}
+        plotId={plotId}
+        onClose={() => {
+          setAddCropVisible(false);
+          fetchCrops(plotId);
+        }}
+      />
     </ScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  title: { fontSize: 22, fontWeight: '700', marginTop: 16 },
-  detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
-  sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 8 },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, marginBottom: 8 },
-  progressBar: { height: 8, borderRadius: 4, overflow: 'hidden', marginBottom: 6 },
+  topBar: { flexDirection: 'row', alignItems: 'center', marginTop: 12, marginBottom: 12 },
+  backBtn: { width: 36, height: 36, borderRadius: 10, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  title: { fontSize: 20, fontWeight: '700' },
+  subtitle: { fontSize: 11, marginTop: 2 },
+  gatBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, borderWidth: 1 },
+  gatText: { fontSize: 11, fontWeight: '700' },
+  detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'rgba(0,0,0,0.06)' },
+  sectionTitle: { fontSize: 15, fontWeight: '700' },
+  progressBar: { height: 8, borderRadius: 4, overflow: 'hidden', marginTop: 10, marginBottom: 8 },
   progressFill: { height: '100%', borderRadius: 4 },
   areaStats: { flexDirection: 'row', justifyContent: 'space-between' },
-  cropRow: { flexDirection: 'row', alignItems: 'center' },
-  cropName: { fontSize: 15, fontWeight: '600' },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, marginBottom: 10 },
+  cropRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  cropName: { fontSize: 15, fontWeight: '700' },
 });

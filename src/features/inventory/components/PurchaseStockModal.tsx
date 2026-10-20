@@ -11,30 +11,45 @@ import type { PaymentMode } from '../../../shared/types/ledger';
 interface PurchaseStockModalProps {
   visible: boolean;
   onClose: () => void;
+  initialItemId?: string;
 }
 
 const PAYMENT_MODES: PaymentMode[] = ['cash', 'upi', 'bank', 'credit', 'cheque'];
 
-export function PurchaseStockModal({ visible, onClose }: PurchaseStockModalProps) {
+export function PurchaseStockModal({ visible, onClose, initialItemId }: PurchaseStockModalProps) {
   const { t, i18n } = useTranslation();
   const { colors } = useTheme();
   const { items, purchaseStock } = useInventoryStore();
   const isMr = i18n.language === 'mr';
 
   const [loading, setLoading] = useState(false);
-  const [selectedItemId, setSelectedItemId] = useState('');
+  const [selectedItemId, setSelectedItemId] = useState(initialItemId || '');
   const [quantity, setQuantity] = useState('');
   const [rate, setRate] = useState('');
   const [supplier, setSupplier] = useState('');
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('cash');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
+  React.useEffect(() => {
+    if (visible) {
+      const targetId = initialItemId || selectedItemId || items[0]?.id || '';
+      setSelectedItemId(targetId);
+      const itm = items.find((i) => i.id === targetId);
+      if (itm && itm.purchaseRate > 0) {
+        setRate(itm.purchaseRate.toString());
+      }
+      if (!supplier) {
+        setSupplier(t('defaultSupplierName'));
+      }
+    }
+  }, [visible, initialItemId, items]);
+
   const selectedItem = items.find((i) => i.id === selectedItemId);
   const total = parseFloat(quantity || '0') * parseFloat(rate || '0');
 
   const handleSave = async () => {
-    if (!selectedItemId) { Alert.alert('Error', 'Select an item'); return; }
-    if (total <= 0) { Alert.alert('Error', 'Enter valid quantity and rate'); return; }
+    if (!selectedItemId) { Alert.alert(t('error'), t('selectItem')); return; }
+    if (total <= 0) { Alert.alert(t('error'), t('enterValidQuantityAndRate')); return; }
 
     setLoading(true);
     try {
@@ -50,7 +65,7 @@ export function PurchaseStockModal({ visible, onClose }: PurchaseStockModalProps
       });
       onClose();
     } catch (err: any) {
-      Alert.alert('Error', err.message);
+      Alert.alert(t('error'), err.message);
     } finally {
       setLoading(false);
     }
@@ -68,7 +83,7 @@ export function PurchaseStockModal({ visible, onClose }: PurchaseStockModalProps
         </View>
 
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <Text style={[styles.label, { color: colors.foreground }]}>Select Item</Text>
+          <Text style={[styles.label, { color: colors.foreground }]}>{t('selectItem')}</Text>
           <View style={styles.chipGrid}>
             {items.map((item) => (
               <TouchableOpacity
@@ -85,20 +100,20 @@ export function PurchaseStockModal({ visible, onClose }: PurchaseStockModalProps
 
           {selectedItem && (
             <Text style={{ color: colors.mutedFg, fontSize: 12, marginBottom: 12 }}>
-              Current Stock: {selectedItem.currentStock} {selectedItem.unit}
+              {t('currentStock')}: {selectedItem.currentStock} {selectedItem.unit}
             </Text>
           )}
 
           <Input label={`${t('quantity')} (${selectedItem?.unit || ''})`} value={quantity} onChangeText={(v) => setQuantity(v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" />
-          <Input label={`${t('rate')} per ${selectedItem?.unit || 'unit'}`} value={rate} onChangeText={(v) => setRate(v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" />
+          <Input label={`${t('rate')} / ${selectedItem?.unit || t('unit')}`} value={rate} onChangeText={(v) => setRate(v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" />
 
           {total > 0 && (
             <Text style={{ color: colors.primary, fontSize: 18, fontWeight: '700', marginBottom: 16 }}>
-              Total: ₹{total.toLocaleString('en-IN')}
+              {t('total')}: ₹{total.toLocaleString('en-IN')}
             </Text>
           )}
 
-          <Input label={t('supplier')} value={supplier} onChangeText={setSupplier} placeholder="Optional" />
+          <Input label={t('supplier')} value={supplier} onChangeText={setSupplier} placeholder={t('optional')} />
           <DatePickerInput label={t('date')} value={date} onChange={setDate} />
 
           <Text style={[styles.label, { color: colors.foreground }]}>{t('paymentMode')}</Text>

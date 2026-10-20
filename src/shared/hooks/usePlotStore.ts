@@ -54,9 +54,22 @@ export const usePlotStore = create<PlotStore>((set, get) => ({
   fetchPlots: async () => {
     set({ isLoading: true });
     try {
-      const q = query(getPlotsRef(), orderBy('createdAt', 'desc'));
-      const snap = await getDocs(q);
-      const plots = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Plot));
+      const snap = await getDocs(getPlotsRef());
+      const plots = snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          ...data,
+          geoLocation: data.location
+            ? { lat: data.location.latitude, lng: data.location.longitude }
+            : data.geoLocation,
+        } as Plot;
+      });
+      plots.sort((a: any, b: any) => {
+        const tA = new Date(a.timestamp || a.createdAt?.toDate?.() || a.createdAt || 0).getTime();
+        const tB = new Date(b.timestamp || b.createdAt?.toDate?.() || b.createdAt || 0).getTime();
+        return tB - tA;
+      });
       set({ plots, isLoading: false });
     } catch (err) {
       logger.error('fetchPlots error:', err);
@@ -66,9 +79,20 @@ export const usePlotStore = create<PlotStore>((set, get) => ({
 
   fetchCrops: async (plotId: string) => {
     try {
-      const q = query(getCropsRef(plotId), orderBy('createdAt', 'desc'));
-      const snap = await getDocs(q);
-      const cropsList = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Crop));
+      const snap = await getDocs(getCropsRef(plotId));
+      const cropsList = snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          plotId,
+          ...data,
+        } as Crop;
+      });
+      cropsList.sort((a: any, b: any) => {
+        const tA = new Date(a.timestamp || a.createdAt?.toDate?.() || a.createdAt || a.sowingDate || 0).getTime();
+        const tB = new Date(b.timestamp || b.createdAt?.toDate?.() || b.createdAt || b.sowingDate || 0).getTime();
+        return tB - tA;
+      });
       set((s) => ({ crops: { ...s.crops, [plotId]: cropsList } }));
     } catch (err) {
       logger.error('fetchCrops error:', err);
@@ -80,7 +104,16 @@ export const usePlotStore = create<PlotStore>((set, get) => ({
       throw new Error('Gat number already exists');
     }
     const now = Timestamp.now();
-    const data = { ...plot, createdAt: now, updatedAt: now };
+    const isoString = new Date().toISOString();
+    const data = {
+      ...plot,
+      timestamp: isoString,
+      createdAt: now,
+      updatedAt: now,
+      location: plot.geoLocation
+        ? { latitude: plot.geoLocation.lat, longitude: plot.geoLocation.lng, address: 'Plot GPS', accuracy: 15 }
+        : undefined,
+    };
     const docRef = await addDoc(getPlotsRef(), data);
     const newPlot = { id: docRef.id, ...data } as Plot;
     set((s) => ({ plots: [newPlot, ...s.plots] }));
@@ -112,7 +145,15 @@ export const usePlotStore = create<PlotStore>((set, get) => ({
       throw new Error('Crop area exceeds remaining plot area');
     }
     const now = Timestamp.now();
-    const data = { ...crop, plotId, status: crop.status || 'sown', createdAt: now, updatedAt: now };
+    const isoString = new Date().toISOString();
+    const data = {
+      ...crop,
+      plotId,
+      status: crop.status || 'sown',
+      timestamp: isoString,
+      createdAt: now,
+      updatedAt: now,
+    };
     const docRef = await addDoc(getCropsRef(plotId), data);
     const newCrop = { id: docRef.id, ...data } as Crop;
     set((s) => ({

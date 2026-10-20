@@ -111,8 +111,13 @@ export interface CustomLedger {
   id: string;
   name: string;
   nameMr?: string;
-  type: 'income' | 'expense' | 'both';
+  type: LedgerType | 'income' | 'expense' | 'both';
+  partyType?: 'merchant' | 'labor_gang' | 'transporter' | 'dairy' | 'farmer' | 'other' | string;
+  phone?: string;
+  address?: string;
+  notes?: string;
   description?: string;
   createdAt: Timestamp;
-  updatedAt: Timestamp;
+  updatedAt?: Timestamp;
 }
+

@@ -47,13 +47,13 @@ export function TransactionFilterBar({ filters, onApply }: TransactionFilterBarP
       <View style={styles.bar}>
         <TouchableOpacity onPress={handleOpen} style={[styles.filterBtn, { borderColor: activeCount > 0 ? colors.primary : colors.border, backgroundColor: activeCount > 0 ? colors.primary + '10' : colors.card }]}>
           <Text style={{ color: activeCount > 0 ? colors.primary : colors.foreground, fontWeight: '600', fontSize: 13 }}>
-            Filters {activeCount > 0 ? `(${activeCount})` : ''}
+            {t('filters')} {activeCount > 0 ? `(${activeCount})` : ''}
           </Text>
         </TouchableOpacity>
 
         {filters.type && (
           <View style={[styles.chip, { backgroundColor: colors.primary + '15', borderColor: colors.primary }]}>
-            <Text style={{ color: colors.primary, fontSize: 12, fontWeight: '600' }}>{filters.type}</Text>
+            <Text style={{ color: colors.primary, fontSize: 12, fontWeight: '600' }}>{t(filters.type)}</Text>
             <TouchableOpacity onPress={() => onApply({ ...filters, type: undefined })}>
               <Text style={{ color: colors.primary, fontSize: 14, fontWeight: '700', marginLeft: 4 }}>×</Text>
             </TouchableOpacity>
@@ -62,7 +62,7 @@ export function TransactionFilterBar({ filters, onApply }: TransactionFilterBarP
 
         {filters.paymentMode && (
           <View style={[styles.chip, { backgroundColor: colors.info + '15', borderColor: colors.info }]}>
-            <Text style={{ color: colors.info, fontSize: 12, fontWeight: '600' }}>{filters.paymentMode}</Text>
+            <Text style={{ color: colors.info, fontSize: 12, fontWeight: '600' }}>{t(filters.paymentMode)}</Text>
             <TouchableOpacity onPress={() => onApply({ ...filters, paymentMode: undefined })}>
               <Text style={{ color: colors.info, fontSize: 14, fontWeight: '700', marginLeft: 4 }}>×</Text>
             </TouchableOpacity>

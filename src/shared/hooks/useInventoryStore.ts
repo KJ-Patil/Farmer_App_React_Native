@@ -11,7 +11,12 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../services/firebase';
-import { InventoryItem, InventoryPurchase, InventoryConsumption } from '../types/inventory';
+import {
+  InventoryItem,
+  InventoryPurchase,
+  InventoryConsumption,
+  PRELOADED_INVENTORY_MASTER,
+} from '../types/inventory';
 import { useAuthStore } from './useAuthStore';
 import { useLedgerStore } from './useLedgerStore';
 import { logger } from '../services/logger';
@@ -33,32 +38,14 @@ interface InventoryStore {
   seedDefaultItems: () => Promise<void>;
 }
 
-const PRELOADED_ITEMS: Partial<InventoryItem>[] = [
-  { name: 'Urea', nameMr: 'युरिया', type: 'fertilizer', unit: 'Kg', purchaseRate: 0, currentStock: 0 },
-  { name: 'DAP', nameMr: 'डीएपी', type: 'fertilizer', unit: 'Kg', purchaseRate: 0, currentStock: 0 },
-  { name: 'MOP (Potash)', nameMr: 'पोटॅश', type: 'fertilizer', unit: 'Kg', purchaseRate: 0, currentStock: 0 },
-  { name: 'SSP', nameMr: 'एसएसपी', type: 'fertilizer', unit: 'Kg', purchaseRate: 0, currentStock: 0 },
-  { name: '10-26-26', nameMr: '१०-२६-२६', type: 'fertilizer', unit: 'Kg', purchaseRate: 0, currentStock: 0 },
-  { name: '20-20-0', nameMr: '२०-२०-०', type: 'fertilizer', unit: 'Kg', purchaseRate: 0, currentStock: 0 },
-  { name: 'Micronutrients', nameMr: 'सूक्ष्म अन्नद्रव्ये', type: 'fertilizer', unit: 'Kg', purchaseRate: 0, currentStock: 0 },
-  { name: 'Organic Manure', nameMr: 'सेंद्रिय खत', type: 'fertilizer', unit: 'Kg', purchaseRate: 0, currentStock: 0 },
-  { name: 'Soybean Seeds', nameMr: 'सोयाबीन बियाणे', type: 'seed', unit: 'Kg', purchaseRate: 0, currentStock: 0 },
-  { name: 'Cotton Seeds', nameMr: 'कापूस बियाणे', type: 'seed', unit: 'Packet', purchaseRate: 0, currentStock: 0 },
-  { name: 'Wheat Seeds', nameMr: 'गहू बियाणे', type: 'seed', unit: 'Kg', purchaseRate: 0, currentStock: 0 },
-  { name: 'Onion Seeds', nameMr: 'कांदा बियाणे', type: 'seed', unit: 'Kg', purchaseRate: 0, currentStock: 0 },
-  { name: 'Rice Seeds', nameMr: 'भात बियाणे', type: 'seed', unit: 'Kg', purchaseRate: 0, currentStock: 0 },
-  { name: 'Imidacloprid', nameMr: 'इमिडाक्लोप्रिड', type: 'pesticide', unit: 'Ltr', purchaseRate: 0, currentStock: 0 },
-  { name: 'Chlorpyrifos', nameMr: 'क्लोरपायरीफॉस', type: 'pesticide', unit: 'Ltr', purchaseRate: 0, currentStock: 0 },
-  { name: 'Mancozeb', nameMr: 'मॅन्कोझेब', type: 'pesticide', unit: 'Kg', purchaseRate: 0, currentStock: 0 },
-  { name: 'Carbendazim', nameMr: 'कार्बेन्डाझिम', type: 'pesticide', unit: 'Kg', purchaseRate: 0, currentStock: 0 },
-  { name: 'Neem Oil', nameMr: 'निंबोळी अर्क', type: 'pesticide', unit: 'Ltr', purchaseRate: 0, currentStock: 0 },
-  { name: 'Other Input', nameMr: 'इतर', type: 'other', unit: 'Kg', purchaseRate: 0, currentStock: 0 },
-];
-
 function getUserMobile(): string {
   const user = useAuthStore.getState().user;
-  if (!user) throw new Error('User not authenticated');
-  return user.mobileNumber;
+  if (!user?.mobileNumber) throw new Error('User not authenticated');
+  let cleanMobile = user.mobileNumber.replace(/\D/g, '');
+  if (cleanMobile.length === 12 && cleanMobile.startsWith('91')) {
+    cleanMobile = cleanMobile.substring(2);
+  }
+  return cleanMobile;
 }
 
 function getItemsRef() {
@@ -116,15 +103,56 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
 
   purchaseStock: async (purchase: Partial<InventoryPurchase>) => {
     const now = Timestamp.now();
-    const data = { ...purchase, createdAt: now, updatedAt: now };
+    const data = {
+      ...purchase,
+      timestamp: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
+    };
     const docRef = await addDoc(getPurchasesRef(), data);
 
     // Increase stock quantity (Purchase ≠ Expense — Business Rule #1)
     const item = get().items.find((i) => i.id === purchase.itemId);
     if (item) {
-      const newStock = item.currentStock + (purchase.quantity || 0);
+      const newStock = (item.currentStock || 0) + (purchase.quantity || 0);
+      const newTotalPurchased = (item.totalPurchased || 0) + (purchase.quantity || 0);
       const newRate = purchase.rate || item.purchaseRate;
-      await get().updateItem(item.id, { currentStock: newStock, purchaseRate: newRate });
+      const newTotalVal = newStock * newRate;
+      await get().updateItem(item.id, {
+        currentStock: newStock,
+        totalPurchased: newTotalPurchased,
+        purchaseRate: newRate,
+        totalValue: newTotalVal,
+      });
+    }
+
+    // Auto-posting to ledger: if credit -> party ledger payable; if cash -> cash outflow
+    if (purchase.paymentMode === 'credit') {
+      await useLedgerStore.getState().createTransaction({
+        type: 'expense',
+        ledgerType: 'party',
+        category: 'कृषी इनपुट खरेदी (Stock In)',
+        partyName: purchase.supplierName || 'कृषी सेवा केंद्र',
+        amount: purchase.totalAmount || 0,
+        date: purchase.date || new Date().toISOString().split('T')[0],
+        paymentMode: 'credit',
+        pendingAmount: purchase.totalAmount || 0,
+        billNumber: purchase.billNumber,
+        notes: `[साठा खरेदी / Stock Inward] ${purchase.itemName} (${purchase.quantity} ${purchase.unit || ''} @ ₹${purchase.rate})`.trim(),
+        isAutoGenerated: true,
+      });
+    } else {
+      await useLedgerStore.getState().createTransaction({
+        type: 'expense',
+        ledgerType: 'personal',
+        category: 'other_expense',
+        amount: purchase.totalAmount || 0,
+        date: purchase.date || new Date().toISOString().split('T')[0],
+        paymentMode: purchase.paymentMode || 'cash',
+        partyName: purchase.supplierName || 'कृषी सेवा केंद्र',
+        notes: `[साठा खरेदी रोख / Stock Purchase] ${purchase.itemName} (${purchase.quantity} ${purchase.unit || ''} @ ₹${purchase.rate})`.trim(),
+        isAutoGenerated: true,
+      });
     }
 
     set((s) => ({
@@ -138,25 +166,44 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
 
     // Business Rule #12: Stock sufficiency check
     if ((consumption.quantity || 0) > item.currentStock) {
-      throw new Error('Insufficient stock');
+      throw new Error(`पुरेसा साठा उपलब्ध नाही! शिल्लक साठा: ${item.currentStock} ${item.unit}`);
     }
 
     const rate = consumption.rate || item.purchaseRate;
     const totalAmount = (consumption.quantity || 0) * rate;
     const now = Timestamp.now();
-    const data = { ...consumption, rate, totalAmount, createdAt: now, updatedAt: now };
+    const data = {
+      ...consumption,
+      unit: item.unit,
+      rate,
+      totalAmount,
+      totalExpense: totalAmount,
+      timestamp: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
+    };
     const docRef = await addDoc(getConsumptionsRef(), data);
 
     // Deduct from stock
+    const newStock = item.currentStock - (consumption.quantity || 0);
+    const newTotalConsumed = (item.totalConsumed || 0) + (consumption.quantity || 0);
+    const newTotalVal = newStock * item.purchaseRate;
     await get().updateItem(item.id, {
-      currentStock: item.currentStock - (consumption.quantity || 0),
+      currentStock: newStock,
+      totalConsumed: newTotalConsumed,
+      totalValue: newTotalVal,
     });
 
     // Business Rule #2: Issue to Crop = Real Expense — auto-post expense entry
+    let expenseCategory = 'otherAgri';
+    if (item.type === 'fertilizer') expenseCategory = 'fertilizers';
+    else if (item.type === 'seed') expenseCategory = 'seeds';
+    else if (item.type === 'pesticide') expenseCategory = 'pesticides';
+
     await useLedgerStore.getState().createTransaction({
       type: 'expense',
       ledgerType: 'agriculture',
-      category: item.type === 'fertilizer' ? 'Fertilizers' : item.type === 'seed' ? 'Seeds' : item.type === 'pesticide' ? 'Pesticides' : 'Other Agri',
+      category: expenseCategory,
       amount: totalAmount,
       date: consumption.date || new Date().toISOString().split('T')[0],
       paymentMode: 'cash',
@@ -164,7 +211,8 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       plotName: consumption.plotName,
       cropId: consumption.cropId,
       cropName: consumption.cropName,
-      notes: `${item.name} - ${consumption.quantity} ${item.unit} @ ₹${rate}`,
+      cropSeason: consumption.cropSeason,
+      notes: `[साठ्यातून वापर / Material Issue] ${item.name} (${consumption.quantity} ${item.unit} @ ₹${rate}). ${consumption.notes || ''}`.trim(),
       isAutoGenerated: true,
       autoEntryType: 'inventory_issue',
       isLocked: true,
@@ -177,9 +225,16 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
 
   fetchPurchases: async () => {
     try {
-      const q = query(getPurchasesRef(), orderBy('createdAt', 'desc'));
-      const snap = await getDocs(q);
-      set({ purchases: snap.docs.map((d) => ({ id: d.id, ...d.data() } as InventoryPurchase)) });
+      let snap;
+      try {
+        const q = query(getPurchasesRef(), orderBy('createdAt', 'desc'));
+        snap = await getDocs(q);
+      } catch {
+        snap = await getDocs(getPurchasesRef());
+      }
+      const purchases = snap.docs.map((d) => ({ id: d.id, ...d.data() } as InventoryPurchase));
+      purchases.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      set({ purchases });
     } catch (err) {
       logger.error('fetchPurchases error:', err);
     }
@@ -187,16 +242,23 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
 
   fetchConsumptions: async () => {
     try {
-      const q = query(getConsumptionsRef(), orderBy('createdAt', 'desc'));
-      const snap = await getDocs(q);
-      set({ consumptions: snap.docs.map((d) => ({ id: d.id, ...d.data() } as InventoryConsumption)) });
+      let snap;
+      try {
+        const q = query(getConsumptionsRef(), orderBy('createdAt', 'desc'));
+        snap = await getDocs(q);
+      } catch {
+        snap = await getDocs(getConsumptionsRef());
+      }
+      const consumptions = snap.docs.map((d) => ({ id: d.id, ...d.data() } as InventoryConsumption));
+      consumptions.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      set({ consumptions });
     } catch (err) {
       logger.error('fetchConsumptions error:', err);
     }
   },
 
   seedDefaultItems: async () => {
-    for (const item of PRELOADED_ITEMS) {
+    for (const item of PRELOADED_INVENTORY_MASTER) {
       await get().createItem(item);
     }
   },

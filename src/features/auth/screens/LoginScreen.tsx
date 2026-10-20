@@ -10,11 +10,21 @@ import { Card } from '../../../components/ui/Card';
 export function LoginScreen({ navigation }: any) {
   const { t, i18n } = useTranslation();
   const { colors } = useTheme();
-  const { requestOtp, verifyOtp, signIn, otpSent, isLoading, error, clearError, fetchUserProfile } = useAuthStore();
+  const {
+    requestOtp,
+    verifyOtp,
+    loginWithVerifiedMobile,
+    otpSent,
+    isLoading,
+    error,
+    clearError,
+    fetchUserProfile,
+  } = useAuthStore();
 
   const [mobile, setMobile] = useState('');
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState<'mobile' | 'otp'>('mobile');
+  const [loginError, setLoginError] = useState('');
 
   const isMr = i18n.language === 'mr';
 
@@ -26,33 +36,30 @@ export function LoginScreen({ navigation }: any) {
   const handleRequestOtp = async () => {
     if (mobile.length !== 10) return;
     clearError();
+    setLoginError('');
     await requestOtp(mobile);
     setStep('otp');
   };
-
-  const [loginError, setLoginError] = useState('');
 
   const handleVerifyOtp = async () => {
     if (otp.length !== 6) return;
     clearError();
     setLoginError('');
+
     const success = await verifyOtp(otp);
     if (!success) return;
 
-    const password = `FL_${mobile}_2024`;
     try {
-      await signIn(mobile, password);
-      console.log('LOGIN SUCCESS');
-    } catch (e: any) {
-      console.log('LOGIN FAILED:', e?.code, e?.message);
-      const profile = await fetchUserProfile(mobile);
-      console.log('PROFILE EXISTS:', !!profile);
-      if (profile) {
-        setLoginError('Login failed. Try registering again or contact support.');
+      const loggedIn = await loginWithVerifiedMobile(mobile);
+      if (loggedIn) {
+        console.log('LOGIN SUCCESS');
       } else {
         console.log('NAVIGATING TO REGISTER');
         navigation.navigate('Register', { mobile });
       }
+    } catch (e: any) {
+      console.log('LOGIN FAILED:', e?.code, e?.message);
+      setLoginError(e?.message || t('loginFailed'));
     }
   };
 
@@ -116,7 +123,7 @@ export function LoginScreen({ navigation }: any) {
                 disabled={otp.length !== 6}
                 fullWidth
               />
-              <TouchableOpacity onPress={() => { setStep('mobile'); setOtp(''); }} style={styles.backLink}>
+              <TouchableOpacity onPress={() => { setStep('mobile'); setOtp(''); setLoginError(''); clearError(); }} style={styles.backLink}>
                 <Text style={{ color: colors.primary }}>{t('back')}</Text>
               </TouchableOpacity>
             </>
@@ -129,7 +136,7 @@ export function LoginScreen({ navigation }: any) {
 
         <View style={styles.divider}>
           <View style={[styles.line, { backgroundColor: colors.border }]} />
-          <Text style={[styles.orText, { color: colors.mutedFg }]}>OR</Text>
+          <Text style={[styles.orText, { color: colors.mutedFg }]}>{t('or')}</Text>
           <View style={[styles.line, { backgroundColor: colors.border }]} />
         </View>
 

@@ -117,9 +117,9 @@ export function RegisterScreen({ navigation, route }: any) {
               <Input label={t('district')} value={form.district} onChangeText={(v) => updateForm('district', v)} />
               <Input label={t('state')} value={form.state} onChangeText={(v) => updateForm('state', v)} />
               <Input label={t('pincode')} value={form.pincode} onChangeText={(v) => updateForm('pincode', v.replace(/[^0-9]/g, '').slice(0, 6))} keyboardType="number-pad" maxLength={6} />
-              <Input label={t('aadhaarNumber')} value={form.aadhaarNumber} onChangeText={(v) => updateForm('aadhaarNumber', v.replace(/[^0-9]/g, '').slice(0, 12))} keyboardType="number-pad" maxLength={12} placeholder="Optional" />
+              <Input label={t('aadhaarNumber')} value={form.aadhaarNumber} onChangeText={(v) => updateForm('aadhaarNumber', v.replace(/[^0-9]/g, '').slice(0, 12))} keyboardType="number-pad" maxLength={12} placeholder={t('optional')} />
               <DatePickerInput label={t('dateOfBirth')} value={form.dateOfBirth} onChange={(v) => updateForm('dateOfBirth', v)} />
-              <Input label={t('farmerId')} value={form.farmerId} onChangeText={(v) => updateForm('farmerId', v)} placeholder="Optional" />
+              <Input label={t('farmerId')} value={form.farmerId} onChangeText={(v) => updateForm('farmerId', v)} placeholder={t('optional')} />
               <Button
                 title={form.geoLocation ? t('gpsLocationCaptured') : t('captureGps')}
                 onPress={handleCaptureGps}

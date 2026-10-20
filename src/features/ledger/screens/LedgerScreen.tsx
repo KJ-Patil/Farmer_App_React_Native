@@ -29,6 +29,21 @@ export function LedgerScreen({ navigation }: any) {
   const [ocrVisible, setOcrVisible] = useState(false);
   const [customLedgersVisible, setCustomLedgersVisible] = useState(false);
   const [filters, setFilters] = useState<TransactionFilters>({});
+  const [ocrInitialData, setOcrInitialData] = useState<any>(null);
+
+  const handleApplyOCR = (data: any) => {
+    setOcrVisible(false);
+    setOcrInitialData({
+      amount: data.amount,
+      partyName: data.merchantName,
+      billNumber: data.billNumber,
+      date: data.date,
+      category: data.category?.toLowerCase() || 'fertilizers',
+      notes: data.items ? `Items: ${data.items}` : '',
+      paymentMode: data.paymentMode || 'cash',
+    });
+    setMoneyOutVisible(true);
+  };
 
   useEffect(() => {
     fetchTransactions();
@@ -100,11 +115,15 @@ export function LedgerScreen({ navigation }: any) {
             )}
           />
         )}
-        {activeTab === 'income' && <IncomeRegisterView />}
+        {activeTab === 'income' && (
+          <IncomeRegisterView onOpenMoneyInModal={() => setMoneyInVisible(true)} />
+        )}
         {activeTab === 'pnl' && <ProfitLossView />}
         {activeTab === 'reports' && <ReportsHubView />}
         {activeTab === 'party' && <PartyLedgerView />}
-        {activeTab === 'credit' && <CreditTrackerView />}
+        {activeTab === 'credit' && (
+          <CreditTrackerView onOpenAddModal={() => setMoneyOutVisible(true)} />
+        )}
       </View>
 
       <View style={styles.fabRow}>
@@ -123,8 +142,16 @@ export function LedgerScreen({ navigation }: any) {
       </View>
 
       <MoneyInModal visible={moneyInVisible} onClose={() => { setMoneyInVisible(false); fetchTransactions(); }} />
-      <MoneyOutModal visible={moneyOutVisible} onClose={() => { setMoneyOutVisible(false); fetchTransactions(); }} />
-      <OCRScannerModal visible={ocrVisible} onClose={() => setOcrVisible(false)} onApply={() => {}} />
+      <MoneyOutModal
+        visible={moneyOutVisible}
+        initialData={ocrInitialData}
+        onClose={() => {
+          setMoneyOutVisible(false);
+          setOcrInitialData(null);
+          fetchTransactions();
+        }}
+      />
+      <OCRScannerModal visible={ocrVisible} onClose={() => setOcrVisible(false)} onApply={handleApplyOCR} />
       <CustomLedgersModal visible={customLedgersVisible} onClose={() => setCustomLedgersVisible(false)} />
     </ScreenLayout>
   );

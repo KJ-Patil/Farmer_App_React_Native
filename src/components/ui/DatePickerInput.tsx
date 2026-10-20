@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, ScrollView } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../app/providers/ThemeProvider';
 import { Button } from './Button';
 
@@ -25,6 +26,7 @@ function formatDate(year: number, month: number, day: number) {
 }
 
 export function DatePickerInput({ label, value, onChange }: DatePickerInputProps) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const [visible, setVisible] = useState(false);
   const parsed = parseDate(value);
@@ -74,7 +76,7 @@ export function DatePickerInput({ label, value, onChange }: DatePickerInputProps
     setDay(1);
   };
 
-  const displayValue = value || 'Select date';
+  const displayValue = value || t('selectDate');
 
   return (
     <>
@@ -124,8 +126,8 @@ export function DatePickerInput({ label, value, onChange }: DatePickerInputProps
             ))}
 
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 16 }}>
-              <Button title="Cancel" onPress={() => setVisible(false)} variant="outline" style={{ flex: 1 }} />
-              <Button title="OK" onPress={handleConfirm} style={{ flex: 1 }} />
+              <Button title={t('cancel')} onPress={() => setVisible(false)} variant="outline" style={{ flex: 1 }} />
+              <Button title={t('ok')} onPress={handleConfirm} style={{ flex: 1 }} />
             </View>
           </View>
         </View>

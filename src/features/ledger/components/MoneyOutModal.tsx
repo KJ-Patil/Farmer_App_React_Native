@@ -13,6 +13,17 @@ import type { PaymentMode, LedgerType } from '../../../shared/types/ledger';
 interface MoneyOutModalProps {
   visible: boolean;
   onClose: () => void;
+  plotId?: string;
+  cropId?: string;
+  initialData?: {
+    amount?: number;
+    partyName?: string;
+    billNumber?: string;
+    date?: string;
+    category?: string;
+    notes?: string;
+    paymentMode?: PaymentMode;
+  };
 }
 
 const PAYMENT_MODES: PaymentMode[] = ['cash', 'upi', 'bank', 'credit', 'cheque'];
@@ -23,15 +34,15 @@ const PERSONAL_CATEGORIES = ['homeExpenses', 'groceries', 'medical', 'education'
 
 type Section = 'agriculture' | 'dairy' | 'personal';
 
-export function MoneyOutModal({ visible, onClose }: MoneyOutModalProps) {
+export function MoneyOutModal({ visible, onClose, initialData, plotId, cropId }: MoneyOutModalProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { postExpenseTransaction } = useLedgerStore();
   const { plots, crops } = usePlotStore();
 
   const [loading, setLoading] = useState(false);
-  const [section, setSection] = useState<Section | ''>('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [section, setSection] = useState<Section | ''>('agriculture');
+  const [selectedCategory, setSelectedCategory] = useState('fertilizers');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('cash');
@@ -39,8 +50,25 @@ export function MoneyOutModal({ visible, onClose }: MoneyOutModalProps) {
   const [billNumber, setBillNumber] = useState('');
   const [notes, setNotes] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const [selectedPlotId, setSelectedPlotId] = useState('');
-  const [selectedCropId, setSelectedCropId] = useState('');
+  const [selectedPlotId, setSelectedPlotId] = useState(plotId || '');
+  const [selectedCropId, setSelectedCropId] = useState(cropId || '');
+
+  React.useEffect(() => {
+    if (visible) {
+      if (plotId) setSelectedPlotId(plotId);
+      if (cropId) setSelectedCropId(cropId);
+      if (initialData) {
+        if (initialData.amount) setAmount(String(initialData.amount));
+        if (initialData.partyName) setPartyName(initialData.partyName);
+        if (initialData.billNumber) setBillNumber(initialData.billNumber);
+        if (initialData.date) setDate(initialData.date);
+        if (initialData.category) setSelectedCategory(initialData.category);
+        if (initialData.notes) setNotes(initialData.notes);
+        if (initialData.paymentMode) setPaymentMode(initialData.paymentMode);
+        setSection('agriculture');
+      }
+    }
+  }, [visible, initialData, plotId, cropId]);
 
   const selectedPlot = plots.find((p) => p.id === selectedPlotId);
   const plotCrops = selectedPlotId ? (crops[selectedPlotId] || []).filter((c) => !c.isLocked) : [];
@@ -50,9 +78,9 @@ export function MoneyOutModal({ visible, onClose }: MoneyOutModalProps) {
   const ledgerType: LedgerType = section === 'agriculture' ? 'agriculture' : section === 'dairy' ? 'dairy' : 'personal';
 
   const handleSave = async () => {
-    if (!selectedCategory) { Alert.alert('Error', 'Select a category'); return; }
+    if (!selectedCategory) { Alert.alert(t('error'), t('selectCategory')); return; }
     const amt = parseFloat(amount || '0');
-    if (amt <= 0) { Alert.alert('Error', 'Enter a valid amount'); return; }
+    if (amt <= 0) { Alert.alert(t('error'), t('enterValidAmount')); return; }
 
     setLoading(true);
     try {
@@ -75,7 +103,7 @@ export function MoneyOutModal({ visible, onClose }: MoneyOutModalProps) {
       });
       onClose();
     } catch (err: any) {
-      Alert.alert('Error', err.message);
+      Alert.alert(t('error'), err.message);
     } finally {
       setLoading(false);
     }
@@ -96,9 +124,9 @@ export function MoneyOutModal({ visible, onClose }: MoneyOutModalProps) {
   );
 
   const sections: { key: Section; label: string; count: number }[] = [
-    { key: 'agriculture', label: 'Agriculture Expenses', count: 13 },
-    { key: 'dairy', label: 'Dairy Expenses', count: 7 },
-    { key: 'personal', label: 'Personal Expenses', count: 12 },
+    { key: 'agriculture', label: t('agricultureExpenses'), count: 13 },
+    { key: 'dairy', label: t('dairyExpenses'), count: 7 },
+    { key: 'personal', label: t('personalExpenses'), count: 12 },
   ];
 
   return (
@@ -115,12 +143,12 @@ export function MoneyOutModal({ visible, onClose }: MoneyOutModalProps) {
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           {!section ? (
             <>
-              <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Expense Section</Text>
+              <Text style={[styles.sectionTitle, { color: colors.foreground }]}>{t('expenseSection')}</Text>
               {sections.map((sec) => (
                 <TouchableOpacity key={sec.key} onPress={() => setSection(sec.key)}>
                   <Card style={{ marginBottom: 10, borderLeftWidth: 4, borderLeftColor: colors.destructive }}>
                     <Text style={{ color: colors.foreground, fontWeight: '600', fontSize: 16 }}>{sec.label}</Text>
-                    <Text style={{ color: colors.mutedFg, fontSize: 12 }}>{sec.count} categories</Text>
+                    <Text style={{ color: colors.mutedFg, fontSize: 12 }}>{sec.count} {t('categoriesCount')}</Text>
                   </Card>
                 </TouchableOpacity>
               ))}
@@ -136,7 +164,7 @@ export function MoneyOutModal({ visible, onClose }: MoneyOutModalProps) {
 
               {section === 'agriculture' && (
                 <>
-                  <Text style={[styles.label, { color: colors.foreground }]}>Link to Plot/Crop (optional)</Text>
+                  <Text style={[styles.label, { color: colors.foreground }]}>{t('linkToPlotCropOptional')}</Text>
                   <View style={styles.chipGrid}>
                     {plots.map((p) => (
                       <TouchableOpacity
@@ -174,9 +202,9 @@ export function MoneyOutModal({ visible, onClose }: MoneyOutModalProps) {
                 <DatePickerInput label={t('dueDate')} value={dueDate} onChange={setDueDate} />
               )}
 
-              <Input label={t('partyName')} value={partyName} onChangeText={setPartyName} placeholder="Optional" />
-              <Input label={t('billNumber')} value={billNumber} onChangeText={setBillNumber} placeholder="Optional" />
-              <Input label={t('notes')} value={notes} onChangeText={setNotes} placeholder="Optional" multiline />
+              <Input label={t('partyName')} value={partyName} onChangeText={setPartyName} placeholder={t('optional')} />
+              <Input label={t('billNumber')} value={billNumber} onChangeText={setBillNumber} placeholder={t('optional')} />
+              <Input label={t('notes')} value={notes} onChangeText={setNotes} placeholder={t('optional')} multiline />
             </>
           )}
         </ScrollView>

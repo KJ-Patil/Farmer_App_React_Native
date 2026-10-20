@@ -36,7 +36,7 @@ export function AddCustomItemModal({ visible, onClose }: AddCustomItemModalProps
   };
 
   const handleSave = async () => {
-    if (!name.trim()) { Alert.alert('Error', 'Enter item name'); return; }
+    if (!name.trim()) { Alert.alert(t('error'), t('enterItemName')); return; }
     setLoading(true);
     try {
       await createItem({
@@ -50,7 +50,7 @@ export function AddCustomItemModal({ visible, onClose }: AddCustomItemModalProps
       resetForm();
       onClose();
     } catch (err: any) {
-      Alert.alert('Error', err.message);
+      Alert.alert(t('error'), err.message);
     } finally {
       setLoading(false);
     }
@@ -68,8 +68,8 @@ export function AddCustomItemModal({ visible, onClose }: AddCustomItemModalProps
         </View>
 
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <Input label={t('name')} value={name} onChangeText={setName} placeholder="e.g. DAP Fertilizer" />
-          <Input label={`${t('name')} (Marathi)`} value={nameMr} onChangeText={setNameMr} placeholder="Optional" />
+          <Input label={t('name')} value={name} onChangeText={setName} placeholder={t('itemNamePlaceholder')} />
+          <Input label={t('itemNameMr')} value={nameMr} onChangeText={setNameMr} placeholder={t('optional')} />
 
           <Text style={[styles.label, { color: colors.foreground }]}>{t('type')}</Text>
           <View style={styles.chipGrid}>
@@ -97,7 +97,7 @@ export function AddCustomItemModal({ visible, onClose }: AddCustomItemModalProps
             ))}
           </View>
 
-          <Input label={`Default ${t('rate')}`} value={rate} onChangeText={(v) => setRate(v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" placeholder="Optional - ₹ per unit" />
+          <Input label={t('defaultRate')} value={rate} onChangeText={(v) => setRate(v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" placeholder={t('ratePerUnitPlaceholder')} />
         </ScrollView>
 
         <View style={[styles.footer, { borderTopColor: colors.border }]}>

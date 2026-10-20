@@ -41,13 +41,13 @@ export function AddCropModal({ visible, onClose, plotId }: AddCropModalProps) {
 
   const handleSave = async () => {
     const cropType = form.cropType === 'custom' ? form.customCropType : form.cropType;
-    if (!cropType.trim()) { Alert.alert('Error', 'Select a crop type'); return; }
-    if (!form.variety.trim()) { Alert.alert('Error', 'Variety is required'); return; }
+    if (!cropType.trim()) { Alert.alert(t('error'), t('selectCropType')); return; }
+    if (!form.variety.trim()) { Alert.alert(t('error'), t('varietyRequired')); return; }
 
     const area = parseFloat(form.area);
-    if (!area || area <= 0) { Alert.alert('Error', 'Valid area is required'); return; }
-    if (area > remaining) { Alert.alert('Error', `Area exceeds remaining plot area (${remaining.toFixed(2)})`); return; }
-    if (!form.sowingDate.trim()) { Alert.alert('Error', 'Sowing date is required'); return; }
+    if (!area || area <= 0) { Alert.alert(t('error'), t('validAreaRequired')); return; }
+    if (area > remaining) { Alert.alert(t('error'), t('areaExceedsRemaining', { remaining: remaining.toFixed(2) })); return; }
+    if (!form.sowingDate.trim()) { Alert.alert(t('error'), t('sowingDateRequired')); return; }
 
     setLoading(true);
     try {
@@ -65,7 +65,7 @@ export function AddCropModal({ visible, onClose, plotId }: AddCropModalProps) {
       });
       onClose();
     } catch (err: any) {
-      Alert.alert('Error', err.message);
+      Alert.alert(t('error'), err.message);
     } finally {
       setLoading(false);
     }
@@ -110,10 +110,10 @@ export function AddCropModal({ visible, onClose, plotId }: AddCropModalProps) {
           </View>
 
           {form.cropType === 'custom' && (
-            <Input label={t('cropType')} value={form.customCropType} onChangeText={(v) => updateForm('customCropType', v)} placeholder="Enter crop name" />
+            <Input label={t('cropType')} value={form.customCropType} onChangeText={(v) => updateForm('customCropType', v)} placeholder={t('enterCropName')} />
           )}
 
-          <Input label={t('variety')} value={form.variety} onChangeText={(v) => updateForm('variety', v)} placeholder="e.g. Basmati, Bt Cotton" />
+          <Input label={t('variety')} value={form.variety} onChangeText={(v) => updateForm('variety', v)} placeholder={t('varietyPlaceholder')} />
 
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <View style={{ flex: 2 }}>
@@ -153,7 +153,7 @@ export function AddCropModal({ visible, onClose, plotId }: AddCropModalProps) {
 
           <View style={{ flexDirection: 'row', gap: 10 }}>
             <View style={{ flex: 2 }}>
-              <Input label={t('estimatedYield')} value={form.estimatedYield} onChangeText={(v) => updateForm('estimatedYield', v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" placeholder="Optional" />
+              <Input label={t('estimatedYield')} value={form.estimatedYield} onChangeText={(v) => updateForm('estimatedYield', v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" placeholder={t('optional')} />
             </View>
             <View style={{ flex: 1 }}>
               <Input label={t('unit')} value={form.estimatedYieldUnit} onChangeText={(v) => updateForm('estimatedYieldUnit', v)} />

@@ -32,7 +32,7 @@ export function CustomLedgersModal({ visible, onClose }: CustomLedgersModalProps
   }, [visible]);
 
   const handleCreate = async () => {
-    if (!name.trim()) { Alert.alert('Error', 'Enter a name'); return; }
+    if (!name.trim()) { Alert.alert(t('error'), t('enterName')); return; }
     setLoading(true);
     try {
       await createCustomLedger({ name: name.trim(), nameMr: nameMr.trim() || undefined, type, description: description.trim() || undefined });
@@ -42,14 +42,14 @@ export function CustomLedgersModal({ visible, onClose }: CustomLedgersModalProps
       setType('both');
       setDescription('');
     } catch (err: any) {
-      Alert.alert('Error', err.message);
+      Alert.alert(t('error'), err.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = (ledger: CustomLedger) => {
-    Alert.alert('Delete', `Delete "${ledger.name}"?`, [
+    Alert.alert(t('delete'), `${t('delete')} "${ledger.name}"?`, [
       { text: t('cancel'), style: 'cancel' },
       { text: t('delete'), style: 'destructive', onPress: () => deleteCustomLedger(ledger.id) },
     ]);
@@ -72,10 +72,10 @@ export function CustomLedgersModal({ visible, onClose }: CustomLedgersModalProps
 
         {showForm && (
           <View style={[styles.formSection, { borderBottomColor: colors.border }]}>
-            <Input label={t('name')} value={name} onChangeText={setName} placeholder="e.g. Labour Payments" />
-            <Input label={`${t('name')} (Marathi)`} value={nameMr} onChangeText={setNameMr} placeholder="Optional" />
+            <Input label={t('name')} value={name} onChangeText={setName} placeholder={t('customLedgerPlaceholder')} />
+            <Input label={`${t('name')} (मराठी)`} value={nameMr} onChangeText={setNameMr} placeholder={t('optional')} />
 
-            <Text style={[styles.label, { color: colors.foreground }]}>Type</Text>
+            <Text style={[styles.label, { color: colors.foreground }]}>{t('type')}</Text>
             <View style={styles.chipGrid}>
               {types.map((tp) => (
                 <TouchableOpacity
@@ -83,12 +83,12 @@ export function CustomLedgersModal({ visible, onClose }: CustomLedgersModalProps
                   onPress={() => setType(tp)}
                   style={[styles.chip, { borderColor: type === tp ? colors.primary : colors.border, backgroundColor: type === tp ? colors.primary + '15' : colors.card, borderRadius: 8 }]}
                 >
-                  <Text style={{ color: type === tp ? colors.primary : colors.foreground, fontWeight: '600', fontSize: 12 }}>{tp.charAt(0).toUpperCase() + tp.slice(1)}</Text>
+                  <Text style={{ color: type === tp ? colors.primary : colors.foreground, fontWeight: '600', fontSize: 12 }}>{t(tp)}</Text>
                 </TouchableOpacity>
               ))}
             </View>
 
-            <Input label={t('description')} value={description} onChangeText={setDescription} placeholder="Optional" />
+            <Input label={t('description')} value={description} onChangeText={setDescription} placeholder={t('optional')} />
             <Button title={t('save')} onPress={handleCreate} loading={loading} fullWidth />
           </View>
         )}
@@ -97,7 +97,7 @@ export function CustomLedgersModal({ visible, onClose }: CustomLedgersModalProps
           data={customLedgers}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}
-          ListEmptyComponent={<Text style={{ color: colors.mutedFg, textAlign: 'center', marginTop: 40 }}>No custom ledgers yet</Text>}
+          ListEmptyComponent={<Text style={{ color: colors.mutedFg, textAlign: 'center', marginTop: 40 }}>{t('noCustomLedgersYet')}</Text>}
           renderItem={({ item }) => (
             <Card style={{ marginTop: 8 }} padding={14}>
               <View style={styles.row}>

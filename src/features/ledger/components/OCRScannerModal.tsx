@@ -25,7 +25,7 @@ export function OCRScannerModal({ visible, onClose, onApply }: OCRScannerModalPr
 
   const handleCamera = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permission.granted) { Alert.alert('Permission needed', 'Camera access is required'); return; }
+    if (!permission.granted) { Alert.alert(t('permissionNeeded'), t('cameraAccessRequired')); return; }
     const pic = await ImagePicker.launchCameraAsync({ quality: 0.8 });
     if (!pic.canceled && pic.assets[0]) {
       processImage(pic.assets[0].uri);
@@ -127,15 +127,15 @@ export function OCRScannerModal({ visible, onClose, onApply }: OCRScannerModalPr
                 />
               </View>
 
-              <Input label="Shop / Party Name" value={editedResult.shopName || ''} onChangeText={(v) => updateField('shopName', v)} />
+              <Input label={t('shopPartyName')} value={editedResult.shopName || ''} onChangeText={(v) => updateField('shopName', v)} />
               <Input label={t('billNumber')} value={editedResult.billNumber || ''} onChangeText={(v) => updateField('billNumber', v)} />
               <DatePickerInput label={t('date')} value={editedResult.date || ''} onChange={(v) => updateField('date', v)} />
               <Input label={t('amount')} value={editedResult.amount?.toString() || ''} onChangeText={(v) => updateField('amount', parseFloat(v) || 0)} keyboardType="decimal-pad" />
-              <Input label="GST Amount" value={editedResult.gstAmount?.toString() || ''} onChangeText={(v) => updateField('gstAmount', parseFloat(v) || 0)} keyboardType="decimal-pad" />
-              <Input label="Items" value={editedResult.items || ''} onChangeText={(v) => updateField('items', v)} multiline />
+              <Input label={t('gstAmount')} value={editedResult.gstAmount?.toString() || ''} onChangeText={(v) => updateField('gstAmount', parseFloat(v) || 0)} keyboardType="decimal-pad" />
+              <Input label={t('items')} value={editedResult.items || ''} onChangeText={(v) => updateField('items', v)} multiline />
 
               <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
-                <Button title="Scan Again" onPress={() => { setResult(null); setEditedResult(null); }} variant="outline" style={{ flex: 1 }} />
+                <Button title={t('scanAgain')} onPress={() => { setResult(null); setEditedResult(null); }} variant="outline" style={{ flex: 1 }} />
                 <Button title={t('applyToEntry')} onPress={handleApply} style={{ flex: 1 }} />
               </View>
             </>

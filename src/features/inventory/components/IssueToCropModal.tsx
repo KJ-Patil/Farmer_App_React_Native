@@ -11,9 +11,10 @@ import { DatePickerInput } from '../../../components/ui/DatePickerInput';
 interface IssueToCropModalProps {
   visible: boolean;
   onClose: () => void;
+  initialItemId?: string;
 }
 
-export function IssueToCropModal({ visible, onClose }: IssueToCropModalProps) {
+export function IssueToCropModal({ visible, onClose, initialItemId }: IssueToCropModalProps) {
   const { t, i18n } = useTranslation();
   const { colors } = useTheme();
   const { items, issueStockToCrop } = useInventoryStore();
@@ -21,11 +22,21 @@ export function IssueToCropModal({ visible, onClose }: IssueToCropModalProps) {
   const isMr = i18n.language === 'mr';
 
   const [loading, setLoading] = useState(false);
-  const [selectedItemId, setSelectedItemId] = useState('');
+  const [selectedItemId, setSelectedItemId] = useState(initialItemId || '');
   const [quantity, setQuantity] = useState('');
   const [selectedPlotId, setSelectedPlotId] = useState('');
   const [selectedCropId, setSelectedCropId] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+
+  React.useEffect(() => {
+    if (visible) {
+      const targetId = initialItemId || selectedItemId || items.find((i) => i.currentStock > 0)?.id || items[0]?.id || '';
+      setSelectedItemId(targetId);
+      if (!selectedPlotId && plots.length > 0) {
+        setSelectedPlotId(plots[0].id);
+      }
+    }
+  }, [visible, initialItemId, items, plots]);
 
   const selectedItem = items.find((i) => i.id === selectedItemId);
   const plotCrops = selectedPlotId ? (crops[selectedPlotId] || []).filter((c) => !c.isLocked) : [];
@@ -33,12 +44,12 @@ export function IssueToCropModal({ visible, onClose }: IssueToCropModalProps) {
   const selectedCrop = plotCrops.find((c) => c.id === selectedCropId);
 
   const handleSave = async () => {
-    if (!selectedItemId) { Alert.alert('Error', 'Select an item'); return; }
-    if (!selectedPlotId || !selectedCropId) { Alert.alert('Error', 'Select plot and crop'); return; }
+    if (!selectedItemId) { Alert.alert(t('error'), t('selectItem')); return; }
+    if (!selectedPlotId || !selectedCropId) { Alert.alert(t('error'), t('selectPlotAndCrop')); return; }
     const qty = parseFloat(quantity || '0');
-    if (qty <= 0) { Alert.alert('Error', 'Enter valid quantity'); return; }
+    if (qty <= 0) { Alert.alert(t('error'), t('enterValidQuantity')); return; }
     if (selectedItem && qty > selectedItem.currentStock) {
-      Alert.alert('Error', t('insufficientStock'));
+      Alert.alert(t('error'), t('insufficientStock'));
       return;
     }
 
@@ -56,7 +67,7 @@ export function IssueToCropModal({ visible, onClose }: IssueToCropModalProps) {
       });
       onClose();
     } catch (err: any) {
-      Alert.alert('Error', err.message);
+      Alert.alert(t('error'), err.message);
     } finally {
       setLoading(false);
     }
@@ -74,7 +85,7 @@ export function IssueToCropModal({ visible, onClose }: IssueToCropModalProps) {
         </View>
 
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-          <Text style={[styles.label, { color: colors.foreground }]}>Select Item</Text>
+          <Text style={[styles.label, { color: colors.foreground }]}>{t('selectItem')}</Text>
           <View style={styles.chipGrid}>
             {items.filter((i) => i.currentStock > 0).map((item) => (
               <TouchableOpacity
@@ -91,7 +102,7 @@ export function IssueToCropModal({ visible, onClose }: IssueToCropModalProps) {
 
           {selectedItem && (
             <Text style={{ color: colors.mutedFg, fontSize: 12, marginBottom: 12 }}>
-              Available: {selectedItem.currentStock} {selectedItem.unit} @ ₹{selectedItem.purchaseRate}/{selectedItem.unit}
+              {t('available')}: {selectedItem.currentStock} {selectedItem.unit} @ ₹{selectedItem.purchaseRate}/{selectedItem.unit}
             </Text>
           )}
 
@@ -112,7 +123,7 @@ export function IssueToCropModal({ visible, onClose }: IssueToCropModalProps) {
 
           {selectedPlotId && plotCrops.length > 0 && (
             <>
-              <Text style={[styles.label, { color: colors.foreground }]}>Crop (active only)</Text>
+              <Text style={[styles.label, { color: colors.foreground }]}>{t('cropActiveOnly')}</Text>
               <View style={styles.chipGrid}>
                 {plotCrops.map((c) => (
                   <TouchableOpacity
@@ -128,7 +139,7 @@ export function IssueToCropModal({ visible, onClose }: IssueToCropModalProps) {
           )}
 
           {selectedPlotId && plotCrops.length === 0 && (
-            <Text style={{ color: colors.warning, fontSize: 12, marginBottom: 12 }}>No active crops in this plot</Text>
+            <Text style={{ color: colors.warning, fontSize: 12, marginBottom: 12 }}>{t('noActiveCropsInPlot')}</Text>
           )}
 
           <DatePickerInput label={t('date')} value={date} onChange={setDate} />

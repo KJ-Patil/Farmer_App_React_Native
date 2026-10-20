@@ -13,6 +13,8 @@ import type { IncomeCategory, PaymentMode } from '../../../shared/types/ledger';
 interface MoneyInModalProps {
   visible: boolean;
   onClose: () => void;
+  plotId?: string;
+  cropId?: string;
 }
 
 const PAYMENT_MODES: PaymentMode[] = ['cash', 'upi', 'bank', 'credit', 'cheque'];
@@ -21,14 +23,14 @@ const LOAN_TYPES = ['cropLoan', 'termLoan', 'tractorLoan', 'goldLoan', 'personal
 const OTHER_SUBTYPES = ['subsidy', 'insuranceClaim', 'tractorRent', 'implementsRent', 'waterSale', 'saplingsSale', 'seedsSale', 'organicManureSale', 'wages', 'interest', 'commission', 'custom'] as const;
 const QUANTITY_UNITS = ['Bags', 'Quintal', 'Kg', 'Ton', 'Crates'];
 
-export function MoneyInModal({ visible, onClose }: MoneyInModalProps) {
+export function MoneyInModal({ visible, onClose, plotId, cropId }: MoneyInModalProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { postIncomeTransaction } = useLedgerStore();
   const { plots, crops } = usePlotStore();
 
   const [loading, setLoading] = useState(false);
-  const [category, setCategory] = useState<IncomeCategory | ''>('');
+  const [category, setCategory] = useState<IncomeCategory | ''>(cropId ? 'crop_sale' : '');
 
   // Common fields
   const [paymentMode, setPaymentMode] = useState<PaymentMode>('cash');
@@ -38,8 +40,19 @@ export function MoneyInModal({ visible, onClose }: MoneyInModalProps) {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
   // Crop Sale
-  const [selectedPlotId, setSelectedPlotId] = useState('');
-  const [selectedCropId, setSelectedCropId] = useState('');
+  const [selectedPlotId, setSelectedPlotId] = useState(plotId || '');
+  const [selectedCropId, setSelectedCropId] = useState(cropId || '');
+
+  React.useEffect(() => {
+    if (visible) {
+      if (plotId) setSelectedPlotId(plotId);
+      if (cropId) {
+        setSelectedCropId(cropId);
+        setCategory('crop_sale');
+      }
+    }
+  }, [visible, plotId, cropId]);
+
   const [buyerName, setBuyerName] = useState('');
   const [quantity, setQuantity] = useState('');
   const [quantityUnit, setQuantityUnit] = useState('Quintal');
@@ -80,12 +93,12 @@ export function MoneyInModal({ visible, onClose }: MoneyInModalProps) {
   const loanNet = parseFloat(sanctionAmount || '0') - parseFloat(processingFee || '0');
 
   const handleSave = async () => {
-    if (!category) { Alert.alert('Error', 'Select a category'); return; }
+    if (!category) { Alert.alert(t('error'), t('selectCategory')); return; }
     setLoading(true);
     try {
       if (category === 'crop_sale') {
         if (!selectedPlotId || !selectedCropId || !buyerName || netAmount <= 0) {
-          Alert.alert('Error', 'Fill all required crop sale fields'); setLoading(false); return;
+          Alert.alert(t('error'), t('fillRequiredCropSaleFields')); setLoading(false); return;
         }
         await postIncomeTransaction({
           incomeCategory: 'crop_sale',
@@ -122,7 +135,7 @@ export function MoneyInModal({ visible, onClose }: MoneyInModalProps) {
         });
       } else if (category === 'dairy') {
         if (!dairyProduct || dairyTotal <= 0) {
-          Alert.alert('Error', 'Fill dairy income details'); setLoading(false); return;
+          Alert.alert(t('error'), t('fillDairyIncomeDetails')); setLoading(false); return;
         }
         await postIncomeTransaction({
           incomeCategory: 'dairy',
@@ -139,7 +152,7 @@ export function MoneyInModal({ visible, onClose }: MoneyInModalProps) {
         });
       } else if (category === 'loan') {
         if (!loanType || loanNet <= 0) {
-          Alert.alert('Error', 'Fill loan details'); setLoading(false); return;
+          Alert.alert(t('error'), t('fillLoanDetails')); setLoading(false); return;
         }
         await postIncomeTransaction({
           incomeCategory: 'loan',
@@ -162,7 +175,7 @@ export function MoneyInModal({ visible, onClose }: MoneyInModalProps) {
       } else if (category === 'other') {
         const amt = parseFloat(otherAmount || '0');
         if (!otherSubtype || amt <= 0) {
-          Alert.alert('Error', 'Fill other income details'); setLoading(false); return;
+          Alert.alert(t('error'), t('fillOtherIncomeDetails')); setLoading(false); return;
         }
         await postIncomeTransaction({
           incomeCategory: 'other',
@@ -175,7 +188,7 @@ export function MoneyInModal({ visible, onClose }: MoneyInModalProps) {
       }
       onClose();
     } catch (err: any) {
-      Alert.alert('Error', err.message);
+      Alert.alert(t('error'), err.message);
     } finally {
       setLoading(false);
     }
@@ -295,7 +308,7 @@ export function MoneyInModal({ visible, onClose }: MoneyInModalProps) {
                   <Input label={t('tenure')} value={tenure} onChangeText={(v) => setTenure(v.replace(/[^0-9]/g, ''))} keyboardType="number-pad" />
                   <Text style={[styles.label, { color: colors.foreground }]}>{t('emiFrequency')}</Text>
                   {renderChips(['monthly', 'yearly', 'halfYearly'], emiFrequency, setEmiFrequency)}
-                  <DatePickerInput label="First Installment Date" value={firstInstallment} onChange={setFirstInstallment} />
+                  <DatePickerInput label={t('firstInstallmentDate')} value={firstInstallment} onChange={setFirstInstallment} />
                   <DatePickerInput label={t('dueDate')} value={loanDueDate} onChange={setLoanDueDate} />
                   <Card style={{ marginVertical: 10, borderLeftWidth: 4, borderLeftColor: colors.warning }} padding={12}>
                     <Text style={{ color: colors.warning, fontWeight: '700', fontSize: 18 }}>{t('netReceived')}: ₹{loanNet.toLocaleString('en-IN')}</Text>
@@ -312,13 +325,13 @@ export function MoneyInModal({ visible, onClose }: MoneyInModalProps) {
               )}
 
               <View style={styles.divider} />
-              <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Common Details</Text>
+              <Text style={[styles.sectionTitle, { color: colors.foreground }]}>{t('commonDetails')}</Text>
               <DatePickerInput label={t('date')} value={date} onChange={setDate} />
               <Text style={[styles.label, { color: colors.foreground }]}>{t('paymentMode')}</Text>
               {renderChips(PAYMENT_MODES, paymentMode, (v) => setPaymentMode(v as PaymentMode))}
-              <Input label={t('partyName')} value={partyName} onChangeText={setPartyName} placeholder="Optional" />
-              <Input label={t('billNumber')} value={billNumber} onChangeText={setBillNumber} placeholder="Optional" />
-              <Input label={t('notes')} value={notes} onChangeText={setNotes} placeholder="Optional" multiline />
+              <Input label={t('partyName')} value={partyName} onChangeText={setPartyName} placeholder={t('optional')} />
+              <Input label={t('billNumber')} value={billNumber} onChangeText={setBillNumber} placeholder={t('optional')} />
+              <Input label={t('notes')} value={notes} onChangeText={setNotes} placeholder={t('optional')} multiline />
             </>
           )}
         </ScrollView>

@@ -8,27 +8,33 @@ import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Badge } from '../../../components/ui/Badge';
 import { AddPlotModal } from '../components/AddPlotModal';
+import { MapPin, Layers, Droplets, Sparkles, Plus } from 'lucide-react-native';
 
 export function PlotListScreen({ navigation }: any) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { colors } = useTheme();
-  const { plots, fetchPlots } = usePlotStore();
+  const { plots, fetchPlots, isLoading } = usePlotStore();
   const [addVisible, setAddVisible] = useState(false);
 
   useEffect(() => {
     fetchPlots();
   }, []);
 
-  const soilLabel = (type: string) => {
-    const labels: Record<string, string> = { black: t('black'), medium: t('medium'), light: t('light') };
-    return labels[type] || type;
-  };
-
   return (
     <ScreenLayout>
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.foreground }]}>{t('plots')}</Text>
-        <Button title={t('addPlot')} onPress={() => setAddVisible(true)} size="sm" />
+        <View style={{ flex: 1, marginRight: 12 }}>
+          <Text style={[styles.title, { color: colors.foreground }]}>{t('plots')}</Text>
+          <Text style={[styles.subtitle, { color: colors.mutedFg }]}>
+            {t('plotListSubtitle')}
+          </Text>
+        </View>
+        <Button
+          title={t('addPlot')}
+          onPress={() => setAddVisible(true)}
+          size="sm"
+          style={styles.addBtn}
+        />
       </View>
 
       <FlatList
@@ -36,26 +42,66 @@ export function PlotListScreen({ navigation }: any) {
         keyExtractor={(p) => p.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
+        refreshing={isLoading}
+        onRefresh={fetchPlots}
         ListEmptyComponent={
-          <Text style={{ color: colors.mutedFg, textAlign: 'center', marginTop: 40 }}>{t('noData')}</Text>
+          <View style={styles.emptyContainer}>
+            <Text style={{ color: colors.mutedFg, textAlign: 'center', fontSize: 14 }}>
+              {t('noData')}
+            </Text>
+          </View>
         }
         renderItem={({ item: plot }) => (
-          <TouchableOpacity onPress={() => navigation.navigate('PlotDashboard', { plotId: plot.id })}>
-            <Card style={{ marginBottom: 10 }}>
-              <Text style={[styles.plotName, { color: colors.foreground }]}>{plot.name}</Text>
-              <View style={styles.plotMeta}>
-                <Badge text={`${t('gatNumber')}: ${plot.gatNumber}`} />
-                <Badge text={`${plot.area} ${t(plot.areaUnit)}`} variant="info" />
-                <Badge text={soilLabel(plot.soilType)} variant="success" />
+          <TouchableOpacity
+            onPress={() => navigation.navigate('PlotDashboard', { plotId: plot.id })}
+            activeOpacity={0.8}
+          >
+            <Card style={styles.plotCard} padding={16}>
+              <View style={styles.plotCardHeader}>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.plotName, { color: colors.foreground }]}>
+                    {plot.name || `${t('plots')} #${plot.gatNumber}`}
+                  </Text>
+                  <Text style={[styles.plotAreaSub, { color: colors.primary }]}>
+                    {plot.name ? `${t('gatNumber')}: ${plot.gatNumber} | ` : ''}
+                    {plot.area} {t(plot.areaUnit || 'acre')}
+                  </Text>
+                </View>
+                {plot.geoLocation && (
+                  <View style={[styles.gpsBadge, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}>
+                    <MapPin color={colors.primary} size={11} />
+                    <Text style={[styles.gpsText, { color: colors.primary }]}>GPS</Text>
+                  </View>
+                )}
               </View>
-              <Text style={{ color: colors.mutedFg, fontSize: 12, marginTop: 6 }}>
-                {plot.irrigationType} • {t(plot.waterAvailability)}
-              </Text>
-              {plot.geoLocation && (
-                <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 2 }}>
-                  📍 {plot.geoLocation.lat.toFixed(4)}, {plot.geoLocation.lng.toFixed(4)}
-                </Text>
-              )}
+
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+              <View style={styles.metaRow}>
+                <View style={styles.metaItem}>
+                  <Layers color="#F59E0B" size={14} />
+                  <Text style={[styles.metaLabel, { color: colors.mutedFg }]}>{t('soilType')}:</Text>
+                  <Text style={[styles.metaValue, { color: colors.foreground }]}>
+                    {t(plot.soilType) || plot.soilType}
+                  </Text>
+                </View>
+
+                <View style={styles.metaItem}>
+                  <Droplets color="#3B82F6" size={14} />
+                  <Text style={[styles.metaLabel, { color: colors.mutedFg }]}>{t('irrigationType')}:</Text>
+                  <Text style={[styles.metaValue, { color: colors.foreground }]}>
+                    {plot.irrigationType}
+                  </Text>
+                </View>
+
+                <View style={styles.metaItem}>
+                  <Sparkles color="#10B981" size={14} />
+                  <Text style={[styles.metaLabel, { color: colors.mutedFg }]}>{t('waterAvailability')}:</Text>
+                  <Text style={[styles.metaValue, { color: colors.foreground }]}>
+                    {t(plot.waterAvailability) || plot.waterAvailability}
+                  </Text>
+                </View>
+              </View>
             </Card>
           </TouchableOpacity>
         )}
@@ -67,8 +113,34 @@ export function PlotListScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, marginBottom: 16 },
-  title: { fontSize: 24, fontWeight: '700' },
-  plotName: { fontSize: 16, fontWeight: '600', marginBottom: 6 },
-  plotMeta: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+    marginBottom: 16,
+  },
+  title: { fontSize: 24, fontWeight: '700', letterSpacing: -0.5 },
+  subtitle: { fontSize: 12, marginTop: 2, lineHeight: 17 },
+  addBtn: { minWidth: 100 },
+  plotCard: { marginBottom: 12 },
+  plotCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  plotName: { fontSize: 16, fontWeight: '700' },
+  plotAreaSub: { fontSize: 12, fontWeight: '600', marginTop: 3 },
+  gpsBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  gpsText: { fontSize: 10, fontWeight: '700' },
+  divider: { height: 1, marginVertical: 12 },
+  metaRow: { gap: 8 },
+  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  metaLabel: { fontSize: 12 },
+  metaValue: { fontSize: 12, fontWeight: '600' },
+  emptyContainer: { paddingVertical: 48, alignItems: 'center' },
 });

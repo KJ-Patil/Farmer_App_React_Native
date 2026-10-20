@@ -60,10 +60,10 @@ export function AddPlotModal({ visible, onClose }: AddPlotModalProps) {
   const validateStep = (): boolean => {
     const errs: Record<string, string> = {};
     if (step === 1) {
-      if (!form.name.trim()) errs.name = 'Plot name is required';
-      if (!form.gatNumber.trim()) errs.gatNumber = 'Gat number is required';
-      if (isDuplicateGatNumber(form.gatNumber)) errs.gatNumber = 'Gat number already exists';
-      if (!form.area || parseFloat(form.area) <= 0) errs.area = 'Valid area is required';
+      if (!form.name.trim()) errs.name = t('plotNameRequired');
+      if (!form.gatNumber.trim()) errs.gatNumber = t('gatNumberRequired');
+      if (isDuplicateGatNumber(form.gatNumber)) errs.gatNumber = t('gatNumberExists');
+      if (!form.area || parseFloat(form.area) <= 0) errs.area = t('validAreaRequired');
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -89,7 +89,7 @@ export function AddPlotModal({ visible, onClose }: AddPlotModalProps) {
       resetForm();
       onClose();
     } catch (err: any) {
-      Alert.alert('Error', err.message);
+      Alert.alert(t('error'), err.message);
     } finally {
       setLoading(false);
     }
@@ -152,8 +152,8 @@ export function AddPlotModal({ visible, onClose }: AddPlotModalProps) {
           {step === 1 && (
             <>
               <Text style={[styles.stepTitle, { color: colors.foreground }]}>{t('plotDetails')}</Text>
-              <Input label={t('plotName')} value={form.name} onChangeText={(v) => updateForm('name', v)} error={errors.name} placeholder="e.g. Farm Plot 1" />
-              <Input label={t('gatNumber')} value={form.gatNumber} onChangeText={(v) => updateForm('gatNumber', v)} error={errors.gatNumber} placeholder="e.g. 123/A" />
+              <Input label={t('plotName')} value={form.name} onChangeText={(v) => updateForm('name', v)} error={errors.name} placeholder={t('plotNamePlaceholder')} />
+              <Input label={t('gatNumber')} value={form.gatNumber} onChangeText={(v) => updateForm('gatNumber', v)} error={errors.gatNumber} placeholder={t('gatNumberPlaceholder')} />
               <Input label={t('area')} value={form.area} onChangeText={(v) => updateForm('area', v.replace(/[^0-9.]/g, ''))} error={errors.area} keyboardType="decimal-pad" placeholder="0.00" />
               <Text style={[styles.label, { color: colors.foreground }]}>{t('areaUnit')}</Text>
               {renderSelector(AREA_UNITS, form.areaUnit, (v) => updateForm('areaUnit', v))}
@@ -184,10 +184,10 @@ export function AddPlotModal({ visible, onClose }: AddPlotModalProps) {
               />
               {form.geoLocation && (
                 <Card style={{ marginTop: 12 }} padding={12}>
-                  <Text style={{ color: colors.foreground, fontWeight: '600' }}>Coordinates</Text>
+                  <Text style={{ color: colors.foreground, fontWeight: '600' }}>{t('coordinates')}</Text>
                   <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 4 }}>
-                    Lat: {form.geoLocation.lat.toFixed(6)}{'\n'}
-                    Lng: {form.geoLocation.lng.toFixed(6)}
+                    {t('latitude')}: {form.geoLocation.lat.toFixed(6)}{'\n'}
+                    {t('longitude')}: {form.geoLocation.lng.toFixed(6)}
                   </Text>
                 </Card>
               )}
