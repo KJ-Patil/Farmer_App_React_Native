@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
   topHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 },
   title: { fontSize: 24, fontWeight: '700', letterSpacing: -0.5 },
   profileRow: { flexDirection: 'row', alignItems: 'center' },
-  avatarImg: { width: 56, height: 56, borderRadius: 28, borderWidth: 1, borderColor: '#DDD' },
+  avatarImg: { width: 56, height: 56, borderRadius: 28, borderWidth: 1, borderColor: '#CBD5E1' },
   avatar: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: '#FFF', fontSize: 22, fontWeight: '700' },
   name: { fontSize: 17, fontWeight: '700' },

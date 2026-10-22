@@ -68,12 +68,12 @@ export function LoginScreen({ navigation }: any) {
       style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <TouchableOpacity onPress={toggleLanguage} style={styles.langBtn}>
+        <Text style={[styles.langText, { color: colors.primary }]}>
+          {isMr ? 'EN' : 'मरा'}
+        </Text>
+      </TouchableOpacity>
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-        <TouchableOpacity onPress={toggleLanguage} style={styles.langBtn}>
-          <Text style={[styles.langText, { color: colors.primary }]}>
-            {isMr ? 'EN' : 'मरा'}
-          </Text>
-        </TouchableOpacity>
 
         <View style={styles.header}>
           <View style={[styles.logo, { backgroundColor: colors.primary }]}>
@@ -101,6 +101,7 @@ export function LoginScreen({ navigation }: any) {
                 loading={isLoading}
                 disabled={mobile.length !== 10}
                 fullWidth
+                style={{ marginTop: 4 }}
               />
             </>
           ) : (
@@ -122,6 +123,7 @@ export function LoginScreen({ navigation }: any) {
                 loading={isLoading}
                 disabled={otp.length !== 6}
                 fullWidth
+                style={{ marginTop: 4 }}
               />
               <TouchableOpacity onPress={() => { setStep('mobile'); setOtp(''); setLoginError(''); clearError(); }} style={styles.backLink}>
                 <Text style={{ color: colors.primary }}>{t('back')}</Text>
@@ -172,7 +174,7 @@ export function LoginScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { flexGrow: 1, justifyContent: 'center', padding: 24 },
-  langBtn: { position: 'absolute', top: 0, right: 0, padding: 8 },
+  langBtn: { position: 'absolute', top: 48, right: 16, padding: 8, zIndex: 10 },
   langText: { fontSize: 16, fontWeight: '700' },
   header: { alignItems: 'center', marginBottom: 32 },
   logo: { width: 64, height: 64, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },

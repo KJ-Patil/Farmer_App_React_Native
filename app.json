@@ -10,6 +10,7 @@
     "ios": {
       "supportsTablet": true
     },
+    "newArchEnabled": false,
     "android": {
       "package": "com.farmerledger.app",
       "adaptiveIcon": {
@@ -26,7 +27,21 @@
     "plugins": [
       "expo-font",
       "expo-sharing",
-      "expo-status-bar"
+      "expo-status-bar",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow FarmerLedger to use your location for GPS tagging plots."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow FarmerLedger to access your photos for bill scanning.",
+          "cameraPermission": "Allow FarmerLedger to use the camera for bill scanning."
+        }
+      ],
+      "expo-av"
     ],
     "extra": {
       "eas": {

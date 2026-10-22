@@ -324,7 +324,7 @@ export function MoneyInModal({ visible, onClose, plotId, cropId }: MoneyInModalP
                 </>
               )}
 
-              <View style={styles.divider} />
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
               <Text style={[styles.sectionTitle, { color: colors.foreground }]}>{t('commonDetails')}</Text>
               <DatePickerInput label={t('date')} value={date} onChange={setDate} />
               <Text style={[styles.label, { color: colors.foreground }]}>{t('paymentMode')}</Text>
@@ -348,13 +348,13 @@ export function MoneyInModal({ visible, onClose, plotId, cropId }: MoneyInModalP
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 12 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 48, paddingBottom: 12 },
   title: { fontSize: 17, fontWeight: '700' },
   scroll: { padding: 16, paddingBottom: 60 },
   sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 12 },
   label: { fontSize: 14, fontWeight: '500', marginBottom: 8 },
   chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   chip: { borderWidth: 1.5, paddingVertical: 8, paddingHorizontal: 12 },
-  divider: { height: 1, backgroundColor: '#E5E5E5', marginVertical: 20 },
+  divider: { height: 1, marginVertical: 20 },
   footer: { padding: 16, borderTopWidth: 1 },
 });

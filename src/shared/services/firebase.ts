@@ -1,8 +1,7 @@
-import { initializeApp } from 'firebase/app';
-import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { initializeApp, FirebaseApp } from 'firebase/app';
+import { getAuth, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
+import { getStorage, FirebaseStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyA8a3HTi22FMz_O2G6hbezyqRuS4SagOak',
@@ -14,11 +13,22 @@ const firebaseConfig = {
   measurementId: 'G-JNTF8QB6BY',
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage),
-});
-const db = getFirestore(app);
-const storage = getStorage(app);
+let app: FirebaseApp;
+let auth: Auth;
+let db: Firestore;
+let storage: FirebaseStorage;
+
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  storage = getStorage(app);
+} catch (e) {
+  console.error('Firebase init failed:', e);
+  app = {} as FirebaseApp;
+  auth = {} as Auth;
+  db = {} as Firestore;
+  storage = {} as FirebaseStorage;
+}
 
 export { app, auth, db, storage };

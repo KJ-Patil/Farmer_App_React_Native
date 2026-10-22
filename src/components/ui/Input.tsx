@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 16,
+    minHeight: 48,
   },
   error: { fontSize: 12, marginTop: 4 },
 });

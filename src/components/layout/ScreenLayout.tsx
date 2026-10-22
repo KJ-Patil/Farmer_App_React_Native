@@ -12,8 +12,8 @@ interface ScreenLayoutProps {
 export function ScreenLayout({ children, noPadding }: ScreenLayoutProps) {
   const { colors, isDark } = useTheme();
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top']}>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={['top', 'bottom']}>
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={colors.background} />
       <OfflineBanner />
       <View style={[styles.content, !noPadding && styles.padding]}>
         {children}

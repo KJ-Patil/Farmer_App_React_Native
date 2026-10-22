@@ -221,7 +221,7 @@ export function MoneyOutModal({ visible, onClose, initialData, plotId, cropId }:
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 16, paddingBottom: 12 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 48, paddingBottom: 12 },
   title: { fontSize: 17, fontWeight: '700' },
   scroll: { padding: 16, paddingBottom: 60 },
   sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 12 },

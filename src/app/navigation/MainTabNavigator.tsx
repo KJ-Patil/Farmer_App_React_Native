@@ -24,8 +24,8 @@ export function MainTabNavigator() {
         tabBarStyle: {
           backgroundColor: colors.card,
           borderTopColor: colors.border,
-          height: 60,
-          paddingBottom: 8,
+          minHeight: 56,
+          paddingBottom: 6,
           paddingTop: 4,
         },
         tabBarLabelStyle: {

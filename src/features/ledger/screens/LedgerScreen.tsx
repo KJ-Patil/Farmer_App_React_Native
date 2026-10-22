@@ -69,7 +69,7 @@ export function LedgerScreen({ navigation }: any) {
 
   return (
     <ScreenLayout noPadding>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabBar} contentContainerStyle={styles.tabContent}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={[styles.tabBar, { borderBottomColor: colors.border, backgroundColor: colors.card }]} contentContainerStyle={styles.tabContent}>
         {tabs.map((tab) => (
           <TouchableOpacity
             key={tab.key}
@@ -158,13 +158,13 @@ export function LedgerScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  tabBar: { maxHeight: 48, borderBottomWidth: 1, borderBottomColor: '#E5E5E5' },
+  tabBar: { maxHeight: 48, borderBottomWidth: 1 },
   tabContent: { paddingHorizontal: 12, gap: 4 },
   tab: { paddingHorizontal: 12, paddingVertical: 12 },
   tabText: { fontSize: 13, fontWeight: '600' },
   content: { flex: 1 },
   txnRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  fabRow: { position: 'absolute', bottom: 16, right: 16, flexDirection: 'row', gap: 8 },
-  fabBtn: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 24, elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 3 },
+  fabRow: { position: 'absolute', bottom: 8, left: 12, right: 12, flexDirection: 'row', gap: 6, justifyContent: 'center' },
+  fabBtn: { paddingHorizontal: 12, paddingVertical: 10, borderRadius: 24, elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 3 },
   fabLabel: { color: '#FFF', fontWeight: '700', fontSize: 12 },
 });
