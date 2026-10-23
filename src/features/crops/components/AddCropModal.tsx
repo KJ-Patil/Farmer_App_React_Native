@@ -6,6 +6,7 @@ import { usePlotStore } from '../../../shared/hooks/usePlotStore';
 import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
+import { Plus } from 'lucide-react-native';
 
 interface AddCropModalProps {
   visible: boolean;
@@ -24,6 +25,8 @@ export function AddCropModal({ visible, onClose, plotId }: AddCropModalProps) {
 
   const remaining = getPlotRemainingArea(plotId);
   const [loading, setLoading] = useState(false);
+  const [cropDropdownOpen, setCropDropdownOpen] = useState(false);
+  const [addingCustomCrop, setAddingCustomCrop] = useState(false);
   const [form, setForm] = useState({
     cropType: '',
     customCropType: '',
@@ -33,8 +36,6 @@ export function AddCropModal({ visible, onClose, plotId }: AddCropModalProps) {
     season: 'kharif' as string,
     sowingDate: '',
     expectedHarvestDate: '',
-    estimatedYield: '',
-    estimatedYieldUnit: 'Quintal',
   });
 
   const updateForm = (key: string, value: any) => setForm((f) => ({ ...f, [key]: value }));
@@ -59,8 +60,6 @@ export function AddCropModal({ visible, onClose, plotId }: AddCropModalProps) {
         season: form.season as any,
         sowingDate: form.sowingDate,
         expectedHarvestDate: form.expectedHarvestDate || undefined,
-        estimatedYield: form.estimatedYield ? parseFloat(form.estimatedYield) : undefined,
-        estimatedYieldUnit: form.estimatedYieldUnit || undefined,
         status: 'sown',
       });
       onClose();
@@ -88,51 +87,68 @@ export function AddCropModal({ visible, onClose, plotId }: AddCropModalProps) {
           </Text>
 
           <Text style={[styles.label, { color: colors.foreground }]}>{t('cropType')}</Text>
-          <View style={styles.chipGrid}>
-            {CROP_PRESETS.map((crop) => (
-              <TouchableOpacity
-                key={crop}
-                onPress={() => updateForm('cropType', crop)}
-                style={[
-                  styles.chip,
-                  {
-                    borderColor: form.cropType === crop ? colors.primary : colors.border,
-                    backgroundColor: form.cropType === crop ? colors.primary + '15' : colors.card,
-                    borderRadius: 8,
-                  },
-                ]}
-              >
-                <Text style={{ color: form.cropType === crop ? colors.primary : colors.foreground, fontWeight: '600', fontSize: 13 }}>
-                  {t(crop)}
-                </Text>
-              </TouchableOpacity>
-            ))}
+          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <TouchableOpacity
+              onPress={() => { setCropDropdownOpen(!cropDropdownOpen); setAddingCustomCrop(false); }}
+              style={[styles.dropdown, { flex: 1, borderColor: colors.border, backgroundColor: colors.card }]}
+              activeOpacity={0.7}
+            >
+              <Text style={{ color: form.cropType ? colors.foreground : colors.mutedFg, fontSize: 14 }}>
+                {form.cropType === 'custom' && form.customCropType
+                  ? form.customCropType
+                  : form.cropType ? t(form.cropType) : t('selectCropType')}
+              </Text>
+              <Text style={{ color: colors.mutedFg, fontSize: 12 }}>{cropDropdownOpen ? '▲' : '▼'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => { setAddingCustomCrop(!addingCustomCrop); setCropDropdownOpen(false); updateForm('cropType', 'custom'); }}
+              style={[styles.addCropBtn, { backgroundColor: colors.primary }]}
+              activeOpacity={0.7}
+            >
+              <Plus color="#FFFFFF" size={14} />
+              <Text style={{ color: '#FFFFFF', fontSize: 12, fontWeight: '700', marginLeft: 3 }}>{t('addCrop')}</Text>
+            </TouchableOpacity>
           </View>
+          {cropDropdownOpen && (
+            <View style={[styles.dropdownList, { borderColor: colors.border, backgroundColor: colors.card }]}>
+              {CROP_PRESETS.filter((c) => c !== 'custom').map((crop) => (
+                <TouchableOpacity
+                  key={crop}
+                  onPress={() => { updateForm('cropType', crop); setCropDropdownOpen(false); setAddingCustomCrop(false); }}
+                  style={[
+                    styles.dropdownItem,
+                    { borderBottomColor: colors.border },
+                    form.cropType === crop && { backgroundColor: colors.primary + '15' },
+                  ]}
+                >
+                  <Text style={{ color: form.cropType === crop ? colors.primary : colors.foreground, fontWeight: form.cropType === crop ? '700' : '500', fontSize: 14 }}>
+                    {t(crop)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
 
-          {form.cropType === 'custom' && (
-            <Input label={t('cropType')} value={form.customCropType} onChangeText={(v) => updateForm('customCropType', v)} placeholder={t('enterCropName')} />
+          {addingCustomCrop && (
+            <Input label={t('enterCropName')} value={form.customCropType} onChangeText={(v) => updateForm('customCropType', v)} placeholder={t('enterCropName')} />
           )}
 
           <Input label={t('variety')} value={form.variety} onChangeText={(v) => updateForm('variety', v)} placeholder={t('varietyPlaceholder')} />
 
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            <View style={{ flex: 2 }}>
-              <Input label={t('area')} value={form.area} onChangeText={(v) => updateForm('area', v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" />
-            </View>
+          <Text style={[styles.label, { color: colors.foreground }]}>{t('area')}</Text>
+          <View style={styles.areaRow}>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.label, { color: colors.foreground }]}>{t('unit')}</Text>
-              <View style={styles.chipGrid}>
-                {AREA_UNITS.map((u) => (
-                  <TouchableOpacity
-                    key={u}
-                    onPress={() => updateForm('areaUnit', u)}
-                    style={[styles.miniChip, { borderColor: form.areaUnit === u ? colors.primary : colors.border, backgroundColor: form.areaUnit === u ? colors.primary + '15' : colors.card, borderRadius: 6 }]}
-                  >
-                    <Text style={{ color: form.areaUnit === u ? colors.primary : colors.foreground, fontSize: 11, fontWeight: '600' }}>{t(u)}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+              <Input value={form.area} onChangeText={(v) => updateForm('area', v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" placeholder="0.00" />
             </View>
+            {AREA_UNITS.map((u) => (
+              <TouchableOpacity
+                key={u}
+                onPress={() => updateForm('areaUnit', u)}
+                style={[styles.unitBtn, { borderColor: form.areaUnit === u ? colors.primary : colors.border, backgroundColor: form.areaUnit === u ? colors.primary + '15' : colors.card }]}
+              >
+                <Text style={{ color: form.areaUnit === u ? colors.primary : colors.foreground, fontSize: 12, fontWeight: '600' }}>{t(u)}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
 
           <Text style={[styles.label, { color: colors.foreground }]}>{t('season')}</Text>
@@ -151,14 +167,6 @@ export function AddCropModal({ visible, onClose, plotId }: AddCropModalProps) {
           <DatePickerInput label={t('sowingDate')} value={form.sowingDate} onChange={(v) => updateForm('sowingDate', v)} />
           <DatePickerInput label={t('expectedHarvest')} value={form.expectedHarvestDate} onChange={(v) => updateForm('expectedHarvestDate', v)} />
 
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            <View style={{ flex: 2 }}>
-              <Input label={t('estimatedYield')} value={form.estimatedYield} onChangeText={(v) => updateForm('estimatedYield', v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" placeholder={t('optional')} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Input label={t('unit')} value={form.estimatedYieldUnit} onChangeText={(v) => updateForm('estimatedYieldUnit', v)} />
-            </View>
-          </View>
         </ScrollView>
 
         <View style={[styles.footer, { borderTopColor: colors.border }]}>
@@ -177,6 +185,11 @@ const styles = StyleSheet.create({
   label: { fontSize: 14, fontWeight: '500', marginBottom: 8 },
   chipGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
   chip: { borderWidth: 1.5, paddingVertical: 10, paddingHorizontal: 14 },
-  miniChip: { borderWidth: 1, paddingVertical: 6, paddingHorizontal: 8 },
+  dropdown: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1, borderRadius: 10, paddingHorizontal: 14, paddingVertical: 12 },
+  addCropBtn: { flexDirection: 'row', height: 44, borderRadius: 10, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 10 },
+  dropdownList: { borderWidth: 1, borderRadius: 10, marginBottom: 16, maxHeight: 220, overflow: 'hidden' },
+  dropdownItem: { paddingHorizontal: 14, paddingVertical: 11, borderBottomWidth: StyleSheet.hairlineWidth },
+  areaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
+  unitBtn: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10 },
   footer: { padding: 16, borderTopWidth: 1 },
 });

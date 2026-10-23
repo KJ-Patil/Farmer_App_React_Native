@@ -11,6 +11,7 @@ import { PurchaseStockModal } from '../components/PurchaseStockModal';
 import { IssueToCropModal } from '../components/IssueToCropModal';
 import { AddCustomItemModal } from '../components/AddCustomItemModal';
 import { Package, ShoppingCart, TrendingDown, Plus, Search } from 'lucide-react-native';
+import { fmtDMY } from '../../../shared/utils/helpers';
 
 type TabKey = 'stock' | 'purchase' | 'issues' | 'master';
 const ITEM_TYPES = ['all', 'fertilizer', 'seed', 'pesticide', 'other'] as const;
@@ -150,60 +151,60 @@ export function InventoryScreen() {
             contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 40 }}
             ListHeaderComponent={
               <View style={{ marginTop: 12, marginBottom: 8 }}>
-                {/* 4 KPI Cards Strip matching FarmerLedger */}
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ gap: 8, paddingBottom: 4 }}
-                >
-                  <Card style={{ minWidth: 145, borderColor: colors.primary + '30', backgroundColor: colors.primary + '0A' }} padding={12}>
-                    <Text style={{ color: colors.primary, fontSize: 10, fontWeight: '700', textTransform: 'uppercase' }}>
-                      {t('totalStockValue')}
-                    </Text>
-                    <Text style={{ color: colors.primary, fontSize: 18, fontWeight: '800', marginTop: 3 }}>
+                {/* KPI Cards */}
+                <View style={styles.kpiGrid}>
+                  <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
+                    <View style={[styles.kpiIconWrap, { backgroundColor: '#DBEAFE' }]}>
+                      <Package color="#2563EB" size={18} />
+                    </View>
+                    <Text style={[styles.kpiValue, { color: colors.foreground }]}>
                       ₹{summaryMetrics.totalStockValue.toLocaleString('en-IN')}
                     </Text>
-                    <Text style={{ color: colors.mutedFg, fontSize: 10, marginTop: 1 }}>
+                    <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>{t('totalStockValue')}</Text>
+                    <Text style={[styles.kpiSub, { color: '#2563EB' }]}>
                       {summaryMetrics.inStockCount} {t('itemsInStock')}
                     </Text>
-                  </Card>
+                  </View>
 
-                  <Card style={{ minWidth: 145, borderColor: '#3B82F630', backgroundColor: '#3B82F60A' }} padding={12}>
-                    <Text style={{ color: '#2563EB', fontSize: 10, fontWeight: '700', textTransform: 'uppercase' }}>
-                      {t('monthlyPurchases')}
-                    </Text>
-                    <Text style={{ color: '#2563EB', fontSize: 18, fontWeight: '800', marginTop: 3 }}>
+                  <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
+                    <View style={[styles.kpiIconWrap, { backgroundColor: '#DCFCE7' }]}>
+                      <ShoppingCart color="#16A34A" size={18} />
+                    </View>
+                    <Text style={[styles.kpiValue, { color: colors.foreground }]}>
                       ₹{summaryMetrics.monthPurchasesTotal.toLocaleString('en-IN')}
                     </Text>
-                    <Text style={{ color: colors.mutedFg, fontSize: 10, marginTop: 1 }}>
+                    <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>{t('monthlyPurchases')}</Text>
+                    <Text style={[styles.kpiSub, { color: '#16A34A' }]}>
                       {purchases.length} {t('purchasesCount')}
                     </Text>
-                  </Card>
+                  </View>
 
-                  <Card style={{ minWidth: 145, borderColor: '#10B98130', backgroundColor: '#10B9810A' }} padding={12}>
-                    <Text style={{ color: '#059669', fontSize: 10, fontWeight: '700', textTransform: 'uppercase' }}>
-                      {t('issuedToCrops')}
-                    </Text>
-                    <Text style={{ color: '#059669', fontSize: 18, fontWeight: '800', marginTop: 3 }}>
+                  <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
+                    <View style={[styles.kpiIconWrap, { backgroundColor: '#FFEDD5' }]}>
+                      <TrendingDown color="#EA580C" size={18} />
+                    </View>
+                    <Text style={[styles.kpiValue, { color: colors.foreground }]}>
                       ₹{summaryMetrics.monthIssuedTotal.toLocaleString('en-IN')}
                     </Text>
-                    <Text style={{ color: colors.mutedFg, fontSize: 10, marginTop: 1 }}>
+                    <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>{t('issuedToCrops')}</Text>
+                    <Text style={[styles.kpiSub, { color: '#EA580C' }]}>
                       {consumptions.length} {t('issuesCount')}
                     </Text>
-                  </Card>
+                  </View>
 
-                  <Card style={{ minWidth: 145 }} padding={12}>
-                    <Text style={{ color: colors.mutedFg, fontSize: 10, fontWeight: '700', textTransform: 'uppercase' }}>
-                      {t('stockHealth')}
-                    </Text>
-                    <Text style={{ color: colors.foreground, fontSize: 18, fontWeight: '800', marginTop: 3 }}>
+                  <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
+                    <View style={[styles.kpiIconWrap, { backgroundColor: '#E2E8F0' }]}>
+                      <Package color="#64748B" size={18} />
+                    </View>
+                    <Text style={[styles.kpiValue, { color: colors.foreground }]}>
                       {summaryMetrics.totalItemsCount}
                     </Text>
-                    <Text style={{ color: colors.warning, fontSize: 10, fontWeight: '700', marginTop: 1 }}>
+                    <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>{t('stockHealth')}</Text>
+                    <Text style={[styles.kpiSub, { color: '#D97706' }]}>
                       {summaryMetrics.outOfStockCount} {t('outOfStock')}
                     </Text>
-                  </Card>
-                </ScrollView>
+                  </View>
+                </View>
 
                 {/* Quick Action Buttons */}
                 <View style={styles.actionRow}>
@@ -279,7 +280,7 @@ export function InventoryScreen() {
                     <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 14 }}>
                       {isMr && item.nameMr ? item.nameMr : item.name}
                     </Text>
-                    <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 2 }}>
+                    <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
                       {item.nameMr && !isMr ? item.nameMr : item.notes || ''}
                     </Text>
                     <View style={{ marginTop: 4 }}>
@@ -296,10 +297,10 @@ export function InventoryScreen() {
                     >
                       {item.currentStock || 0} {item.unit}
                     </Text>
-                    <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 2 }}>
+                    <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
                       ₹{item.purchaseRate || 0}/{item.unit}
                     </Text>
-                    <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '700', marginTop: 1 }}>
+                    <Text style={{ color: colors.primary, fontSize: 13, fontWeight: '700', marginTop: 1 }}>
                       ₹{((item.currentStock || 0) * (item.purchaseRate || 0)).toLocaleString('en-IN')}
                     </Text>
                   </View>
@@ -356,9 +357,9 @@ export function InventoryScreen() {
                       {p.itemName}
                     </Text>
                     <Text style={{ color: colors.mutedFg, fontSize: 12, marginTop: 2 }}>
-                      {p.date} • {p.supplierName || t('generalSupplier')}
+                      {fmtDMY(p.date)} • {p.supplierName || t('generalSupplier')}
                     </Text>
-                    <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 1 }}>
+                    <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 1 }}>
                       {p.quantity} × ₹{p.rate}
                     </Text>
                   </View>
@@ -405,7 +406,7 @@ export function InventoryScreen() {
                       {c.itemName}
                     </Text>
                     <Text style={{ color: colors.mutedFg, fontSize: 12, marginTop: 2 }}>
-                      {c.date} • {c.cropName || t('crops')} ({c.plotName || t('plots')})
+                      {fmtDMY(c.date)} • {c.cropName || t('crops')} ({c.plotName || t('plots')})
                     </Text>
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
@@ -442,10 +443,10 @@ export function InventoryScreen() {
                       {isMr && item.nameMr ? item.nameMr : item.name}
                     </Text>
                     {item.nameMr && !isMr ? (
-                      <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 1 }}>{item.nameMr}</Text>
+                      <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 1 }}>{item.nameMr}</Text>
                     ) : null}
                     {item.notes ? (
-                      <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 2 }}>{item.notes}</Text>
+                      <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>{item.notes}</Text>
                     ) : null}
                   </View>
                   <Badge text={t(item.type) || item.type} variant="info" />
@@ -500,7 +501,12 @@ const styles = StyleSheet.create({
   tabContent: { paddingHorizontal: 12, gap: 4 },
   tab: { paddingHorizontal: 12, paddingVertical: 12 },
   content: { flex: 1 },
-  kpiRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  kpiGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  kpiCard: { width: '47%' as any, borderRadius: 24, padding: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 3 } as any, shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 },
+  kpiIconWrap: { width: 34, height: 34, borderRadius: 10, alignItems: 'center' as const, justifyContent: 'center' as const, marginBottom: 10 },
+  kpiValue: { fontSize: 20, fontWeight: '800' as const, letterSpacing: -0.5 },
+  kpiLabel: { fontSize: 13, fontWeight: '600' as const, marginTop: 2, textTransform: 'uppercase' as const, letterSpacing: 0.3 },
+  kpiSub: { fontSize: 13, fontWeight: '600' as const, marginTop: 4 },
   actionRow: { flexDirection: 'row', gap: 10, marginTop: 14 },
   searchBox: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, height: 42, borderRadius: 10, borderWidth: 1, marginTop: 12 },
   searchInput: { flex: 1, marginLeft: 8, fontSize: 13 },

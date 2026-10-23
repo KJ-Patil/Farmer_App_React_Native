@@ -3,10 +3,10 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   FlatList,
   TouchableOpacity,
   TextInput,
+  ScrollView,
   Modal,
   Alert,
 } from 'react-native';
@@ -19,6 +19,7 @@ import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
 import type { Transaction, PaymentMode } from '../../../shared/types/ledger';
+import { fmtDMY } from '../../../shared/utils/helpers';
 import {
   TrendingUp,
   Sprout,
@@ -32,6 +33,7 @@ import {
   Trash2,
   X,
   CreditCard,
+  IndianRupee,
 } from 'lucide-react-native';
 
 interface IncomeRegisterViewProps {
@@ -202,155 +204,44 @@ export function IncomeRegisterView({ onOpenMoneyInModal }: IncomeRegisterViewPro
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
         ListHeaderComponent={
           <View style={{ paddingTop: 8 }}>
-            {/* Header with Title and Add Button */}
-            <View style={styles.headerRow}>
-              <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <TrendingUp color={colors.primary} size={18} />
-                  <Text style={[styles.mainTitle, { color: colors.foreground }]}>
-                    {t('incomeRegisterTitle')}
+            {/* Summary Card */}
+            <Card style={{ borderRadius: 16 }} padding={16}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <View style={[styles.summaryIcon, { backgroundColor: '#DCFCE7' }]}>
+                      <IndianRupee color="#16A34A" size={20} />
+                    </View>
+                    <Text style={[styles.mainTitle, { color: colors.foreground }]}>
+                      {t('incomeRegisterTitle')}
+                    </Text>
+                  </View>
+                  <Text style={[styles.totalAmount, { color: colors.foreground }]}>
+                    {fmt(totalNetIncome)}
                   </Text>
+                  <View style={{ flexDirection: 'row', gap: 16, marginTop: 6 }}>
+                    <View>
+                      <Text style={{ color: colors.mutedFg, fontSize: 12 }}>{t('thisMonth')}</Text>
+                      <Text style={{ color: colors.foreground, fontSize: 14, fontWeight: '700' }}>{fmt(monthIncome)}</Text>
+                    </View>
+                    <View>
+                      <Text style={{ color: colors.mutedFg, fontSize: 12 }}>{t('todaysIncome')}</Text>
+                      <Text style={{ color: '#16A34A', fontSize: 14, fontWeight: '700' }}>{fmt(todayIncome)}</Text>
+                    </View>
+                  </View>
                 </View>
-                <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 2 }}>
-                  {t('incomeRegisterSubtitle')}
-                </Text>
+
+                {onOpenMoneyInModal && (
+                  <TouchableOpacity
+                    onPress={onOpenMoneyInModal}
+                    style={styles.addButton}
+                    activeOpacity={0.8}
+                  >
+                    <Plus color="#FFFFFF" size={28} strokeWidth={2.5} />
+                  </TouchableOpacity>
+                )}
               </View>
-
-              {onOpenMoneyInModal && (
-                <Button
-                  title={`+ ${t('recordIncome')}`}
-                  onPress={onOpenMoneyInModal}
-                  size="sm"
-                />
-              )}
-            </View>
-
-            {/* 5 Primary KPI Cards (Horizontal Scroll) */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 12 }}>
-              <Card style={[styles.kpiCard, { borderColor: colors.primary + '30', backgroundColor: colors.primary + '10' }]} padding={12}>
-                <Text style={[styles.kpiLabel, { color: colors.primary }]}>
-                  {t('todaysIncome')}
-                </Text>
-                <Text style={[styles.kpiValue, { color: colors.primary }]}>{fmt(todayIncome)}</Text>
-                <Text style={{ color: colors.mutedFg, fontSize: 10, marginTop: 2 }}>
-                  {incomeTransactions.filter((t) => (t.date || '').startsWith(todayStr)).length} {t('transactionsCount')}
-                </Text>
-              </Card>
-
-              <Card style={[styles.kpiCard, { borderColor: colors.primary + '30', backgroundColor: colors.primary + '10' }]} padding={12}>
-                <Text style={[styles.kpiLabel, { color: colors.primary }]}>
-                  {t('thisMonth')}
-                </Text>
-                <Text style={[styles.kpiValue, { color: colors.primary }]}>{fmt(monthIncome)}</Text>
-                <Text style={{ color: colors.mutedFg, fontSize: 10, marginTop: 2 }}>{currentMonthKey}</Text>
-              </Card>
-
-              <Card style={styles.kpiCard} padding={12}>
-                <Text style={[styles.kpiLabel, { color: colors.info }]}>
-                  {t('thisYear')}
-                </Text>
-                <Text style={[styles.kpiValue, { color: colors.info }]}>{fmt(yearIncome)}</Text>
-                <Text style={{ color: colors.mutedFg, fontSize: 10, marginTop: 2 }}>{currentYearKey}</Text>
-              </Card>
-
-              <Card style={styles.kpiCard} padding={12}>
-                <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>
-                  {t('totalMoneyIn')}
-                </Text>
-                <Text style={[styles.kpiValue, { color: colors.foreground }]}>{fmt(totalNetIncome)}</Text>
-                <Text style={{ color: colors.mutedFg, fontSize: 10, marginTop: 2 }}>
-                  {t('gross')}: {fmt(totalGrossIncome)}
-                </Text>
-              </Card>
-
-              <Card
-                style={[
-                  styles.kpiCard,
-                  {
-                    borderColor: netFarmProfit >= 0 ? colors.primary + '40' : colors.destructive + '40',
-                    backgroundColor: netFarmProfit >= 0 ? colors.primary + '10' : colors.destructive + '10',
-                  },
-                ]}
-                padding={12}
-              >
-                <Text style={[styles.kpiLabel, { color: netFarmProfit >= 0 ? colors.primary : colors.destructive }]}>
-                  {t('netFarmProfit')}
-                </Text>
-                <Text style={[styles.kpiValue, { color: netFarmProfit >= 0 ? colors.primary : colors.destructive }]}>
-                  {netFarmProfit < 0 ? '-' : ''}{fmt(Math.abs(netFarmProfit))}
-                </Text>
-                <Text style={{ color: colors.mutedFg, fontSize: 10, marginTop: 2 }}>
-                  {t('incomeLessExpense')}
-                </Text>
-              </Card>
-            </ScrollView>
-
-            {/* 4 Category Cards (2x2 Grid) */}
-            <View style={styles.categoryGrid}>
-              <Card style={styles.catCard} padding={12}>
-                <View style={styles.catHeader}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Sprout color={colors.primary} size={15} />
-                    <Text style={[styles.catTitle, { color: colors.foreground }]}>
-                      {t('cropSales')}
-                    </Text>
-                  </View>
-                  <Badge text={`${cropSales.length}`} variant="success" />
-                </View>
-                <Text style={[styles.catAmount, { color: colors.primary }]}>{fmt(totalCropSaleNet)}</Text>
-                <Text style={{ color: colors.mutedFg, fontSize: 10 }}>
-                  {t('gross')}: {fmt(totalCropSaleGross)}
-                </Text>
-              </Card>
-
-              <Card style={styles.catCard} padding={12}>
-                <View style={styles.catHeader}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Milk color="#6366F1" size={15} />
-                    <Text style={[styles.catTitle, { color: colors.foreground }]}>
-                      {t('dairyIncome')}
-                    </Text>
-                  </View>
-                  <Badge text={`${dairyIncomes.length}`} variant="info" />
-                </View>
-                <Text style={[styles.catAmount, { color: '#6366F1' }]}>{fmt(totalDairyIncome)}</Text>
-                <Text style={{ color: colors.mutedFg, fontSize: 10 }}>
-                  {t('dairyIncomeDesc')}
-                </Text>
-              </Card>
-
-              <Card style={styles.catCard} padding={12}>
-                <View style={styles.catHeader}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Landmark color={colors.warning} size={15} />
-                    <Text style={[styles.catTitle, { color: colors.foreground }]}>
-                      {t('loansReceived')}
-                    </Text>
-                  </View>
-                  <Badge text={`${loanIncomes.length}`} variant="warning" />
-                </View>
-                <Text style={[styles.catAmount, { color: colors.warning }]}>{fmt(totalLoanReceived)}</Text>
-                <Text style={{ color: colors.mutedFg, fontSize: 10 }}>
-                  {t('loansReceivedDesc')}
-                </Text>
-              </Card>
-
-              <Card style={styles.catCard} padding={12}>
-                <View style={styles.catHeader}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Briefcase color="#8B5CF6" size={15} />
-                    <Text style={[styles.catTitle, { color: colors.foreground }]}>
-                      {t('otherIncome')}
-                    </Text>
-                  </View>
-                  <Badge text={`${otherIncomes.length}`} />
-                </View>
-                <Text style={[styles.catAmount, { color: '#8B5CF6' }]}>{fmt(totalOtherIncome)}</Text>
-                <Text style={{ color: colors.mutedFg, fontSize: 10 }}>
-                  {t('otherIncomeDesc')}
-                </Text>
-              </Card>
-            </View>
+            </Card>
 
             {/* Active Loans & EMI Reminders Section */}
             {activeLoans.length > 0 && (
@@ -389,13 +280,13 @@ export function IncomeRegisterView({ onOpenMoneyInModal }: IncomeRegisterViewPro
                           <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 13 }}>
                             {loan.partyName || loan.category}
                           </Text>
-                          <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 2 }}>
+                          <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
                             {loan.loanDetails?.loanType || t('bankLoan')}
                             {loan.loanDetails?.interestRate ? ` • ${loan.loanDetails.interestRate}%` : ''}
                           </Text>
                         </View>
                         <View style={{ alignItems: 'flex-end' }}>
-                          <Text style={{ color: colors.mutedFg, fontSize: 10 }}>
+                          <Text style={{ color: colors.mutedFg, fontSize: 13 }}>
                             {t('outstanding')}
                           </Text>
                           <Text style={{ color: colors.destructive, fontWeight: '700', fontSize: 14 }}>
@@ -417,7 +308,7 @@ export function IncomeRegisterView({ onOpenMoneyInModal }: IncomeRegisterViewPro
                       >
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                           <Calendar color={colors.mutedFg} size={12} />
-                          <Text style={{ color: isOverdue ? colors.destructive : colors.mutedFg, fontSize: 11, fontWeight: '600' }}>
+                          <Text style={{ color: isOverdue ? colors.destructive : colors.mutedFg, fontSize: 13, fontWeight: '600' }}>
                             {loan.dueDate || loan.loanDetails?.firstInstallmentDate || '—'}
                           </Text>
                         </View>
@@ -530,19 +421,19 @@ export function IncomeRegisterView({ onOpenMoneyInModal }: IncomeRegisterViewPro
                   </View>
 
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
-                    <Text style={{ color: colors.mutedFg, fontSize: 11 }}>{tx.date}</Text>
+                    <Text style={{ color: colors.mutedFg, fontSize: 13 }}>{fmtDMY(tx.date)}</Text>
                     {tx.partyName && (
-                      <Text style={{ color: colors.foreground, fontSize: 11, fontWeight: '600' }}>
+                      <Text style={{ color: colors.foreground, fontSize: 13, fontWeight: '600' }}>
                         • {tx.partyName}
                       </Text>
                     )}
                     {tx.plotName && (
-                      <Text style={{ color: colors.primary, fontSize: 11 }}>• {tx.plotName}</Text>
+                      <Text style={{ color: colors.primary, fontSize: 13 }}>• {tx.plotName}</Text>
                     )}
                   </View>
 
                   {tx.notes && (
-                    <Text style={{ color: colors.mutedFg, fontSize: 11, fontStyle: 'italic', marginTop: 2 }}>
+                    <Text style={{ color: colors.mutedFg, fontSize: 13, fontStyle: 'italic', marginTop: 2 }}>
                       {tx.notes}
                     </Text>
                   )}
@@ -670,16 +561,10 @@ export function IncomeRegisterView({ onOpenMoneyInModal }: IncomeRegisterViewPro
 }
 
 const styles = StyleSheet.create({
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  mainTitle: { fontSize: 16, fontWeight: '700' },
-  kpiCard: { width: 140, marginRight: 8, borderRadius: 14 },
-  kpiLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase' },
-  kpiValue: { fontSize: 18, fontWeight: '800', marginTop: 4 },
-  categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  catCard: { width: '48.5%', borderRadius: 14 },
-  catHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  catTitle: { fontSize: 12, fontWeight: '700' },
-  catAmount: { fontSize: 16, fontWeight: '800', marginTop: 6 },
+  mainTitle: { fontSize: 15, fontWeight: '700' },
+  summaryIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  totalAmount: { fontSize: 28, fontWeight: '800', marginTop: 8, letterSpacing: -0.5 },
+  addButton: { width: 56, height: 56, borderRadius: 16, backgroundColor: '#16A34A', alignItems: 'center', justifyContent: 'center', elevation: 4, shadowColor: '#16A34A', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 },
   loanItemCard: { padding: 10, borderRadius: 12, borderWidth: 1, marginTop: 8 },
   searchBox: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 12, paddingHorizontal: 10, height: 40 },
   searchInput: { flex: 1, marginLeft: 8, fontSize: 13, height: '100%' },

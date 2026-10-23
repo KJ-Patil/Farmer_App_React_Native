@@ -8,6 +8,13 @@ export const formatDate = (dateStr: string): string => {
   return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
+export const fmtDMY = (dateStr: string | undefined): string => {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+  return dateStr;
+};
+
 export const mobileToEmail = (mobile: string): string => {
   return `${mobile}@farmerledger.com`;
 };

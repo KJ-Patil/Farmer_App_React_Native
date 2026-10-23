@@ -13,6 +13,7 @@ import { DatePickerInput } from '../../../components/ui/DatePickerInput';
 import { MoneyInModal } from '../../ledger/components/MoneyInModal';
 import { MoneyOutModal } from '../../ledger/components/MoneyOutModal';
 import { ArrowLeft, Sprout, TrendingUp, TrendingDown, DollarSign } from 'lucide-react-native';
+import { fmtDMY } from '../../../shared/utils/helpers';
 
 const STATUS_ORDER = ['sown', 'vegetative', 'flowering', 'harvested'] as const;
 
@@ -142,31 +143,27 @@ export function CropDashboardScreen({ route, navigation }: any) {
         )}
 
         {/* Financial KPI Summary for this Crop */}
-        <Card style={{ marginTop: 12 }}>
-          <Text style={[styles.sectionTitle, { color: colors.foreground, marginBottom: 8 }]}>
+        <View style={{ marginTop: 12 }}>
+          <Text style={[styles.sectionTitle, { color: colors.foreground, marginBottom: 8, paddingHorizontal: 4 }]}>
             {t('cropFinancialSummary')}
           </Text>
           <View style={styles.finGrid}>
-            <View style={styles.finItem}>
-              <Text style={{ fontSize: 11, color: colors.mutedFg }}>{t('revenue')}</Text>
-              <Text style={{ fontSize: 16, fontWeight: '800', color: colors.primary }}>
+            <View style={[styles.finItem, styles.finCard, { backgroundColor: colors.card }]}>
+              <Text style={[styles.finLabel, { color: colors.mutedFg }]}>{t('revenue')}</Text>
+              <Text style={[styles.finValue, { color: '#16A34A' }]}>
                 ₹{cropFinancials.income.toLocaleString('en-IN')}
               </Text>
             </View>
-            <View style={styles.finItem}>
-              <Text style={{ fontSize: 11, color: colors.mutedFg }}>{t('expenses')}</Text>
-              <Text style={{ fontSize: 16, fontWeight: '800', color: colors.destructive }}>
+            <View style={[styles.finItem, styles.finCard, { backgroundColor: colors.card }]}>
+              <Text style={[styles.finLabel, { color: colors.mutedFg }]}>{t('expenses')}</Text>
+              <Text style={[styles.finValue, { color: '#DC2626' }]}>
                 ₹{cropFinancials.expenses.toLocaleString('en-IN')}
               </Text>
             </View>
-            <View style={styles.finItem}>
-              <Text style={{ fontSize: 11, color: colors.mutedFg }}>{t('netMargin')}</Text>
+            <View style={[styles.finItem, styles.finCard, { backgroundColor: colors.card }]}>
+              <Text style={[styles.finLabel, { color: colors.mutedFg }]}>{t('netMargin')}</Text>
               <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: '800',
-                  color: cropFinancials.profit >= 0 ? colors.primary : colors.destructive,
-                }}
+                style={[styles.finValue, { color: cropFinancials.profit >= 0 ? '#16A34A' : '#DC2626' }]}
               >
                 ₹{cropFinancials.profit.toLocaleString('en-IN')}
               </Text>
@@ -187,7 +184,7 @@ export function CropDashboardScreen({ route, navigation }: any) {
               style={{ flex: 1 }}
             />
           </View>
-        </Card>
+        </View>
 
         {/* Crop Cycle Parameters */}
         <Card style={{ marginTop: 12 }}>
@@ -197,18 +194,18 @@ export function CropDashboardScreen({ route, navigation }: any) {
           </View>
           <View style={styles.detailRow}>
             <Text style={{ color: colors.mutedFg }}>{t('sowingDate')}</Text>
-            <Text style={{ color: colors.foreground, fontWeight: '700' }}>{crop.sowingDate}</Text>
+            <Text style={{ color: colors.foreground, fontWeight: '700' }}>{fmtDMY(crop.sowingDate)}</Text>
           </View>
           {crop.expectedHarvestDate && (
             <View style={styles.detailRow}>
               <Text style={{ color: colors.mutedFg }}>{t('expectedHarvest')}</Text>
-              <Text style={{ color: colors.foreground, fontWeight: '700' }}>{crop.expectedHarvestDate}</Text>
+              <Text style={{ color: colors.foreground, fontWeight: '700' }}>{fmtDMY(crop.expectedHarvestDate)}</Text>
             </View>
           )}
           {crop.actualHarvestDate && (
             <View style={styles.detailRow}>
               <Text style={{ color: colors.mutedFg }}>{t('actualHarvest')}</Text>
-              <Text style={{ color: colors.primary, fontWeight: '700' }}>{crop.actualHarvestDate}</Text>
+              <Text style={{ color: colors.primary, fontWeight: '700' }}>{fmtDMY(crop.actualHarvestDate)}</Text>
             </View>
           )}
           {crop.actualYield !== undefined && (
@@ -320,12 +317,15 @@ const styles = StyleSheet.create({
   title: { fontSize: 20, fontWeight: '700' },
   banner: { padding: 12, borderRadius: 10, marginTop: 10 },
   sectionTitle: { fontSize: 15, fontWeight: '700' },
-  finGrid: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6 },
+  finGrid: { flexDirection: 'row', gap: 8 },
   finItem: { flex: 1, alignItems: 'center' },
+  finCard: { borderRadius: 24, padding: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 },
+  finLabel: { fontSize: 13, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.3 },
+  finValue: { fontSize: 18, fontWeight: '800', marginTop: 4, letterSpacing: -0.5 },
   detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'rgba(0,0,0,0.06)' },
   statusTimeline: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 6 },
   statusItem: { flex: 1, alignItems: 'center', position: 'relative' },
   statusDot: { width: 20, height: 20, borderRadius: 10, zIndex: 2 },
-  statusLabel: { fontSize: 10, marginTop: 4, textTransform: 'capitalize' },
+  statusLabel: { fontSize: 12, marginTop: 4, textTransform: 'capitalize' },
   statusLine: { position: 'absolute', top: 10, left: '50%', right: '-50%', height: 2, zIndex: 1 },
 });

@@ -20,7 +20,7 @@ import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Badge } from '../../../components/ui/Badge';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
-import { CSV_BOM } from '../../../shared/utils/helpers';
+import { CSV_BOM, fmtDMY } from '../../../shared/utils/helpers';
 import type { Transaction } from '../../../shared/types/ledger';
 import {
   FileText,
@@ -233,7 +233,7 @@ export function ReportsHubView() {
     text += `⚖️ ${t('netBalance')}: ₹${Math.round(summary.net).toLocaleString('en-IN')}\n\n`;
 
     filteredData.slice(0, 10).forEach((tx) => {
-      text += `• ${tx.date}: ${tx.category} ${tx.type === 'income' ? '+₹' : '-₹'}${tx.amount} (${tx.paymentMode})\n`;
+      text += `• ${fmtDMY(tx.date)}: ${tx.category} ${tx.type === 'income' ? '+₹' : '-₹'}${tx.amount} (${tx.paymentMode})\n`;
     });
 
     if (filteredData.length > 10) {
@@ -260,7 +260,7 @@ export function ReportsHubView() {
                 {t('reportsHubTitle')}
               </Text>
             </View>
-            <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 2 }}>
+            <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
               {t('reportsHubSubtitle')}
             </Text>
 
@@ -293,7 +293,7 @@ export function ReportsHubView() {
 
             {/* Date Range Selectors */}
             <Card style={{ marginBottom: 12 }} padding={12}>
-              <Text style={{ color: colors.mutedFg, fontSize: 11, fontWeight: '700', marginBottom: 8, textTransform: 'uppercase' }}>
+              <Text style={{ color: colors.mutedFg, fontSize: 13, fontWeight: '700', marginBottom: 8, textTransform: 'uppercase' }}>
                 {t('selectDateRange')}
               </Text>
               <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -316,24 +316,24 @@ export function ReportsHubView() {
 
             {/* Summary KPIs */}
             <View style={styles.kpiRow}>
-              <Card style={[styles.kpiCard, { borderColor: colors.primary + '30', backgroundColor: colors.primary + '08' }]} padding={12}>
-                <Text style={[styles.kpiLabel, { color: colors.primary }]}>{t('totalInflow')}</Text>
-                <Text style={[styles.kpiVal, { color: colors.primary }]}>{fmt(summary.totalIn)}</Text>
-              </Card>
+              <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
+                <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>{t('totalInflow')}</Text>
+                <Text style={[styles.kpiVal, { color: '#16A34A' }]}>{fmt(summary.totalIn)}</Text>
+              </View>
 
-              <Card style={[styles.kpiCard, { borderColor: colors.destructive + '30', backgroundColor: colors.destructive + '08' }]} padding={12}>
-                <Text style={[styles.kpiLabel, { color: colors.destructive }]}>{t('totalOutflow')}</Text>
-                <Text style={[styles.kpiVal, { color: colors.destructive }]}>{fmt(summary.totalOut)}</Text>
-              </Card>
+              <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
+                <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>{t('totalOutflow')}</Text>
+                <Text style={[styles.kpiVal, { color: '#DC2626' }]}>{fmt(summary.totalOut)}</Text>
+              </View>
 
-              <Card style={styles.kpiCard} padding={12}>
-                <Text style={[styles.kpiLabel, { color: summary.net >= 0 ? colors.primary : colors.destructive }]}>
+              <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
+                <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>
                   {t('netBalance')}
                 </Text>
-                <Text style={[styles.kpiVal, { color: summary.net >= 0 ? colors.primary : colors.destructive }]}>
+                <Text style={[styles.kpiVal, { color: summary.net >= 0 ? '#16A34A' : '#DC2626' }]}>
                   {summary.net < 0 ? '-' : ''}{fmt(Math.abs(summary.net))}
                 </Text>
-              </Card>
+              </View>
             </View>
 
             {/* Action Export Buttons */}
@@ -378,8 +378,8 @@ export function ReportsHubView() {
                   />
                   {tx.billNumber && <Badge text={`#${tx.billNumber}`} variant="default" />}
                 </View>
-                <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 2 }}>
-                  {tx.date}
+                <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
+                  {fmtDMY(tx.date)}
                   {tx.partyName ? ` • ${tx.partyName}` : ''}
                   {tx.cropName ? ` • ${tx.cropName}` : ''}
                 </Text>
@@ -406,8 +406,8 @@ export function ReportsHubView() {
 const styles = StyleSheet.create({
   reportTab: { paddingHorizontal: 14, paddingVertical: 8, borderWidth: 1, borderRadius: 10, marginRight: 8 },
   kpiRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
-  kpiCard: { flex: 1, borderRadius: 14 },
-  kpiLabel: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase' },
-  kpiVal: { fontSize: 15, fontWeight: '800', marginTop: 4 },
+  kpiCard: { flex: 1, borderRadius: 24, padding: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 },
+  kpiLabel: { fontSize: 13, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.3 },
+  kpiVal: { fontSize: 16, fontWeight: '800', marginTop: 6, letterSpacing: -0.5 },
   actionRow: { flexDirection: 'row', gap: 10, marginBottom: 6 },
 });

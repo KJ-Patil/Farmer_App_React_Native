@@ -7,7 +7,7 @@ import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
-import * as Location from 'expo-location';
+
 
 interface AddPlotModalProps {
   visible: boolean;
@@ -34,7 +34,6 @@ export function AddPlotModal({ visible, onClose }: AddPlotModalProps) {
     soilType: 'black' as typeof SOIL_TYPES[number],
     irrigationType: 'well' as string,
     waterAvailability: 'perennial' as 'perennial' | 'seasonal',
-    geoLocation: undefined as { lat: number; lng: number } | undefined,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -43,19 +42,6 @@ export function AddPlotModal({ visible, onClose }: AddPlotModalProps) {
     setErrors((e) => ({ ...e, [key]: '' }));
   };
 
-  const handleCaptureGps = async () => {
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === 'granted') {
-        const loc = await Location.getCurrentPositionAsync({});
-        updateForm('geoLocation', { lat: loc.coords.latitude, lng: loc.coords.longitude });
-      } else {
-        updateForm('geoLocation', { lat: 20.005, lng: 73.765 });
-      }
-    } catch {
-      updateForm('geoLocation', { lat: 20.005, lng: 73.765 });
-    }
-  };
 
   const validateStep = (): boolean => {
     const errs: Record<string, string> = {};
@@ -84,7 +70,6 @@ export function AddPlotModal({ visible, onClose }: AddPlotModalProps) {
         soilType: form.soilType,
         irrigationType: form.irrigationType,
         waterAvailability: form.waterAvailability,
-        geoLocation: form.geoLocation,
       });
       resetForm();
       onClose();
@@ -97,7 +82,7 @@ export function AddPlotModal({ visible, onClose }: AddPlotModalProps) {
 
   const resetForm = () => {
     setStep(1);
-    setForm({ name: '', gatNumber: '', area: '', areaUnit: 'acre', soilType: 'black', irrigationType: 'well', waterAvailability: 'perennial', geoLocation: undefined });
+    setForm({ name: '', gatNumber: '', area: '', areaUnit: 'acre', soilType: 'black', irrigationType: 'well', waterAvailability: 'perennial' });
     setErrors({});
   };
 
@@ -141,11 +126,11 @@ export function AddPlotModal({ visible, onClose }: AddPlotModalProps) {
             <Text style={{ color: colors.primary, fontSize: 16, fontWeight: '600' }}>{t('cancel')}</Text>
           </TouchableOpacity>
           <Text style={[styles.title, { color: colors.foreground }]}>{t('addPlot')}</Text>
-          <Text style={{ color: colors.mutedFg, fontSize: 13 }}>{t('step')} {step}/4</Text>
+          <Text style={{ color: colors.mutedFg, fontSize: 13 }}>{t('step')} {step}/3</Text>
         </View>
 
         <View style={[styles.progressBar, { backgroundColor: colors.muted }]}>
-          <View style={[styles.progressFill, { width: `${(step / 4) * 100}%`, backgroundColor: colors.primary }]} />
+          <View style={[styles.progressFill, { width: `${(step / 3) * 100}%`, backgroundColor: colors.primary }]} />
         </View>
 
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
@@ -175,27 +160,6 @@ export function AddPlotModal({ visible, onClose }: AddPlotModalProps) {
 
           {step === 3 && (
             <>
-              <Text style={[styles.stepTitle, { color: colors.foreground }]}>{t('location')}</Text>
-              <Button
-                title={form.geoLocation ? t('gpsLocationCaptured') : t('captureGps')}
-                onPress={handleCaptureGps}
-                variant={form.geoLocation ? 'secondary' : 'outline'}
-                fullWidth
-              />
-              {form.geoLocation && (
-                <Card style={{ marginTop: 12 }} padding={12}>
-                  <Text style={{ color: colors.foreground, fontWeight: '600' }}>{t('coordinates')}</Text>
-                  <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 4 }}>
-                    {t('latitude')}: {form.geoLocation.lat.toFixed(6)}{'\n'}
-                    {t('longitude')}: {form.geoLocation.lng.toFixed(6)}
-                  </Text>
-                </Card>
-              )}
-            </>
-          )}
-
-          {step === 4 && (
-            <>
               <Text style={[styles.stepTitle, { color: colors.foreground }]}>{t('preview')}</Text>
               <Card>
                 <View style={styles.previewRow}>
@@ -222,14 +186,6 @@ export function AddPlotModal({ visible, onClose }: AddPlotModalProps) {
                   <Text style={{ color: colors.mutedFg }}>{t('waterAvailability')}</Text>
                   <Text style={{ color: colors.foreground, fontWeight: '600' }}>{t(form.waterAvailability)}</Text>
                 </View>
-                {form.geoLocation && (
-                  <View style={styles.previewRow}>
-                    <Text style={{ color: colors.mutedFg }}>GPS</Text>
-                    <Text style={{ color: colors.foreground, fontSize: 12 }}>
-                      {form.geoLocation.lat.toFixed(4)}, {form.geoLocation.lng.toFixed(4)}
-                    </Text>
-                  </View>
-                )}
               </Card>
             </>
           )}
@@ -239,7 +195,7 @@ export function AddPlotModal({ visible, onClose }: AddPlotModalProps) {
           {step > 1 && (
             <Button title={t('back')} onPress={() => setStep(step - 1)} variant="outline" style={{ flex: 1, marginRight: 8 }} />
           )}
-          {step < 4 ? (
+          {step < 3 ? (
             <Button title={t('next')} onPress={handleNext} style={{ flex: 1 }} />
           ) : (
             <Button title={t('save')} onPress={handleSave} loading={loading} style={{ flex: 1 }} />

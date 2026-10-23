@@ -8,7 +8,7 @@ import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Badge } from '../../../components/ui/Badge';
 import { AddPlotModal } from '../components/AddPlotModal';
-import { MapPin, Layers, Droplets, Sparkles, Plus } from 'lucide-react-native';
+import { Layers, Droplets, Sparkles, Plus } from 'lucide-react-native';
 
 export function PlotListScreen({ navigation }: any) {
   const { t, i18n } = useTranslation();
@@ -67,12 +67,6 @@ export function PlotListScreen({ navigation }: any) {
                     {plot.area} {t(plot.areaUnit || 'acre')}
                   </Text>
                 </View>
-                {plot.geoLocation && (
-                  <View style={[styles.gpsBadge, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}>
-                    <MapPin color={colors.primary} size={11} />
-                    <Text style={[styles.gpsText, { color: colors.primary }]}>GPS</Text>
-                  </View>
-                )}
               </View>
 
               <View style={[styles.divider, { backgroundColor: colors.border }]} />
@@ -90,7 +84,7 @@ export function PlotListScreen({ navigation }: any) {
                   <Droplets color="#3B82F6" size={14} />
                   <Text style={[styles.metaLabel, { color: colors.mutedFg }]}>{t('irrigationType')}:</Text>
                   <Text style={[styles.metaValue, { color: colors.foreground }]}>
-                    {plot.irrigationType}
+                    {t(plot.irrigationType) || plot.irrigationType}
                   </Text>
                 </View>
 
@@ -127,16 +121,6 @@ const styles = StyleSheet.create({
   plotCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   plotName: { fontSize: 16, fontWeight: '700' },
   plotAreaSub: { fontSize: 12, fontWeight: '600', marginTop: 3 },
-  gpsBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  gpsText: { fontSize: 10, fontWeight: '700' },
   divider: { height: 1, marginVertical: 12 },
   metaRow: { gap: 8 },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },

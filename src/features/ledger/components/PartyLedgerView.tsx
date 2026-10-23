@@ -18,6 +18,7 @@ import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
+import { fmtDMY } from '../../../shared/utils/helpers';
 import type { PaymentMode } from '../../../shared/types/ledger';
 import {
   Users,
@@ -244,14 +245,14 @@ export function PartyLedgerView() {
                       </View>
                     )}
                     {activeParty.partyType && (
-                      <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '600', marginTop: 2 }}>
+                      <Text style={{ color: colors.primary, fontSize: 13, fontWeight: '600', marginTop: 2 }}>
                         {activeParty.partyType}
                       </Text>
                     )}
                   </View>
 
                   <View style={{ alignItems: 'flex-end' }}>
-                    <Text style={{ color: colors.mutedFg, fontSize: 10 }}>
+                    <Text style={{ color: colors.mutedFg, fontSize: 13 }}>
                       {t('currentBalance')}
                     </Text>
                     <Text
@@ -273,16 +274,16 @@ export function PartyLedgerView() {
                 {/* Dues summary row */}
                 <View style={[styles.duesRow, { borderTopColor: colors.border }]}>
                   <View>
-                    <Text style={{ color: colors.mutedFg, fontSize: 10 }}>{t('totalPurchases')}</Text>
+                    <Text style={{ color: colors.mutedFg, fontSize: 13 }}>{t('totalPurchases')}</Text>
                     <Text style={{ color: colors.destructive, fontWeight: '700', fontSize: 13 }}>{fmt(activeParty.totalDebit)}</Text>
                   </View>
                   <View>
-                    <Text style={{ color: colors.mutedFg, fontSize: 10 }}>{t('totalPaid')}</Text>
+                    <Text style={{ color: colors.mutedFg, fontSize: 13 }}>{t('totalPaid')}</Text>
                     <Text style={{ color: colors.primary, fontWeight: '700', fontSize: 13 }}>{fmt(activeParty.totalCredit)}</Text>
                   </View>
                   {activeParty.pendingCreditDue > 0 && (
                     <View>
-                      <Text style={{ color: colors.mutedFg, fontSize: 10 }}>{t('pendingBills')}</Text>
+                      <Text style={{ color: colors.mutedFg, fontSize: 13 }}>{t('pendingBills')}</Text>
                       <Text style={{ color: colors.warning, fontWeight: '700', fontSize: 13 }}>{fmt(activeParty.pendingCreditDue)}</Text>
                     </View>
                   )}
@@ -314,12 +315,12 @@ export function PartyLedgerView() {
                   <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 13 }}>
                     {tx.category || (tx.type === 'expense' ? t('purchase') : t('payment'))}
                   </Text>
-                  <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 2 }}>
-                    {tx.date} • {tx.paymentMode?.toUpperCase()}
+                  <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
+                    {fmtDMY(tx.date)} • {tx.paymentMode?.toUpperCase()}
                     {tx.billNumber ? ` • #${tx.billNumber}` : ''}
                   </Text>
                   {tx.notes && (
-                    <Text style={{ color: colors.mutedFg, fontSize: 11, fontStyle: 'italic', marginTop: 2 }}>
+                    <Text style={{ color: colors.mutedFg, fontSize: 13, fontStyle: 'italic', marginTop: 2 }}>
                       {tx.notes}
                     </Text>
                   )}
@@ -335,7 +336,7 @@ export function PartyLedgerView() {
                   >
                     {tx.type === 'expense' ? '-' : '+'}{fmt(tx.amount)}
                   </Text>
-                  <Text style={{ color: colors.mutedFg, fontSize: 10, marginTop: 2 }}>
+                  <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
                     Bal: {fmt(Math.abs(tx.runningBalance))}
                   </Text>
                 </View>
@@ -384,7 +385,7 @@ export function PartyLedgerView() {
                   style={{
                     color: paymentType === 'pay_to_party' ? '#FFF' : colors.foreground,
                     fontWeight: '700',
-                    fontSize: 11,
+                    fontSize: 13,
                   }}
                 >
                   {t('paidToParty')}
@@ -404,7 +405,7 @@ export function PartyLedgerView() {
                   style={{
                     color: paymentType === 'receive_from_party' ? '#FFF' : colors.foreground,
                     fontWeight: '700',
-                    fontSize: 11,
+                    fontSize: 13,
                   }}
                 >
                   {t('receivedFromParty')}
@@ -499,27 +500,27 @@ export function PartyLedgerView() {
                 {t('partyLedgersTitle')}
               </Text>
             </View>
-            <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 2 }}>
+            <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
               {t('partyLedgersSubtitle')}
             </Text>
 
             {/* Overview KPIs */}
             <View style={styles.kpiRow}>
-              <Card style={styles.kpiCard} padding={12}>
+              <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
                 <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>
                   {t('totalParties')}
                 </Text>
                 <Text style={[styles.kpiVal, { color: colors.foreground }]}>{partiesList.length}</Text>
-              </Card>
+              </View>
 
-              <Card style={[styles.kpiCard, { borderColor: colors.destructive + '30', backgroundColor: colors.destructive + '08' }]} padding={12}>
-                <Text style={[styles.kpiLabel, { color: colors.destructive }]}>
+              <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
+                <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>
                   {t('pendingCredit')}
                 </Text>
-                <Text style={[styles.kpiVal, { color: colors.destructive }]}>
+                <Text style={[styles.kpiVal, { color: '#DC2626' }]}>
                   {fmt(totalPendingAllParties)}
                 </Text>
-              </Card>
+              </View>
             </View>
 
             {/* Search Box */}
@@ -561,13 +562,13 @@ export function PartyLedgerView() {
                     <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 14 }}>
                       {party.name}
                     </Text>
-                    <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 2 }}>
+                    <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
                       {party.txCount} {t('transactionsCount')}
                       {party.phone ? ` • 📞 ${party.phone}` : ''}
                       {party.lastDate ? ` • ${party.lastDate}` : ''}
                     </Text>
                     {party.pendingCreditDue > 0 && (
-                      <Text style={{ color: colors.warning, fontSize: 11, fontWeight: '700', marginTop: 2 }}>
+                      <Text style={{ color: colors.warning, fontSize: 13, fontWeight: '700', marginTop: 2 }}>
                         {t('pendingCreditLabel')} {fmt(party.pendingCreditDue)}
                       </Text>
                     )}
@@ -602,9 +603,9 @@ const styles = StyleSheet.create({
   backBtn: { flexDirection: 'row', alignItems: 'center', paddingVertical: 6 },
   duesRow: { flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: StyleSheet.hairlineWidth, marginTop: 12, paddingTop: 10 },
   kpiRow: { flexDirection: 'row', gap: 10, marginVertical: 12 },
-  kpiCard: { flex: 1, borderRadius: 14 },
-  kpiLabel: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase' },
-  kpiVal: { fontSize: 18, fontWeight: '800', marginTop: 4 },
+  kpiCard: { flex: 1, borderRadius: 24, padding: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 },
+  kpiLabel: { fontSize: 13, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.3 },
+  kpiVal: { fontSize: 18, fontWeight: '800', marginTop: 6, letterSpacing: -0.5 },
   searchBox: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderRadius: 12, paddingHorizontal: 10, height: 40, marginBottom: 8 },
   searchInput: { flex: 1, marginLeft: 8, fontSize: 13, height: '100%' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 20 },

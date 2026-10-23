@@ -12,7 +12,6 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../app/providers/ThemeProvider';
 import { useLedgerStore } from '../../../shared/hooks/useLedgerStore';
-import { useInventoryStore } from '../../../shared/hooks/useInventoryStore';
 import { useAppStore } from '../../../shared/hooks/useAppStore';
 import { useAuthStore } from '../../../shared/hooks/useAuthStore';
 import { db } from '../../../shared/services/firebase';
@@ -23,10 +22,10 @@ import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { AreaChart } from '../../../components/ui/AreaChart';
+import { fmtDMY } from '../../../shared/utils/helpers';
 import {
   TrendingUp,
   Users,
-  Package,
   RefreshCw,
   Plus,
   X,
@@ -41,7 +40,6 @@ export function DashboardScreen({ navigation }: any) {
 
   const user = useAuthStore((s) => s.user);
   const { transactions, fetchTransactions } = useLedgerStore();
-  const { items, fetchItems } = useInventoryStore();
   const { isOnline, syncQueueCount } = useAppStore();
 
   // Quick transaction modal state
@@ -53,7 +51,6 @@ export function DashboardScreen({ navigation }: any) {
 
   useEffect(() => {
     fetchTransactions();
-    fetchItems();
   }, []);
 
   // Compute metrics identical to FarmerLedger
@@ -67,18 +64,6 @@ export function DashboardScreen({ navigation }: any) {
       .filter((n): n is string => Boolean(n && n.trim()));
     return new Set(names).size || (transactions.length > 0 ? 1 : 0);
   }, [transactions]);
-
-  const inventoryStats = useMemo(() => {
-    const totalVal = items.reduce(
-      (sum, i) => sum + (i.currentStock || 0) * (i.purchaseRate || 0),
-      0
-    );
-    const inStockCount = items.filter((i) => (i.currentStock || 0) > 0).length || items.length;
-    return {
-      value: totalVal > 0 ? totalVal : 75000,
-      count: inStockCount > 0 ? inStockCount : 5,
-    };
-  }, [items]);
 
   // Aggregate monthly trend data from transactions for the AreaChart
   const getTxDateString = (tx: any): string => {
@@ -114,7 +99,7 @@ export function DashboardScreen({ navigation }: any) {
     return result;
   }, [transactions]);
 
-  const recentTxns = transactions.slice(0, 8);
+  const recentTxns = transactions.slice(0, 5);
 
   const formatCurrency = (v: number) => `₹${v.toLocaleString('en-IN')}`;
 
@@ -162,65 +147,40 @@ export function DashboardScreen({ navigation }: any) {
           <Text style={[styles.subtitle, { color: colors.mutedFg }]}>{t('dashboardSubtitle')}</Text>
         </View>
 
-        {/* 4 KPI Cards Grid identical to FarmerLedger */}
+        {/* 4 KPI Cards Grid */}
         <View style={styles.kpiGrid}>
-          {/* 1. Total Revenue */}
-          <Card style={styles.kpiCard} padding={14}>
+          <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
             <View style={styles.kpiHeader}>
               <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>{t('totalRevenue')}</Text>
-              <TrendingUp color="#10B981" size={18} />
+              <TrendingUp color="#16A34A" size={18} />
             </View>
             <Text style={[styles.kpiValue, { color: colors.foreground }]}>
               {formatCurrency(totalRevenue)}
             </Text>
-            <Text style={[styles.kpiSub, { color: colors.mutedFg }]}>
-              <Text style={{ color: '#10B981', fontWeight: '700' }}>{transactions.length}</Text>{' '}
-              {t('recentLedger')}
+            <Text style={[styles.kpiSub, { color: '#16A34A' }]}>
+              {transactions.length} {t('recentLedger')}
             </Text>
-          </Card>
+          </View>
 
-          {/* 2. Active Farmers */}
-          <Card style={styles.kpiCard} padding={14}>
+          <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
             <View style={styles.kpiHeader}>
               <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>{t('activeFarmers')}</Text>
-              <Users color={colors.primary} size={18} />
+              <Users color="#2563EB" size={18} />
             </View>
             <Text style={[styles.kpiValue, { color: colors.foreground }]}>{uniqueFarmers}</Text>
-            <Text style={[styles.kpiSub, { color: colors.mutedFg }]}>{t('uniqueFarmerRecords')}</Text>
-          </Card>
+            <Text style={[styles.kpiSub, { color: '#2563EB' }]}>{t('uniqueFarmerRecords')}</Text>
+          </View>
 
-          {/* 3. Inventory Value */}
-          <Card style={styles.kpiCard} padding={14}>
-            <View style={styles.kpiHeader}>
-              <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>{t('inventoryValue')}</Text>
-              <Package color="#6366F1" size={18} />
-            </View>
-            <Text style={[styles.kpiValue, { color: colors.foreground }]}>
-              {formatCurrency(inventoryStats.value)}
-            </Text>
-            <Text style={[styles.kpiSub, { color: colors.mutedFg }]}>
-              <Text style={{ color: '#6366F1', fontWeight: '700' }}>{inventoryStats.count}</Text>{' '}
-              {t('itemsInStock')}
-            </Text>
-          </Card>
-
-          {/* 4. Offline Queue */}
-          <Card style={styles.kpiCard} padding={14}>
+          <View style={[styles.kpiCard, { width: '100%', backgroundColor: colors.card }]}>
             <View style={styles.kpiHeader}>
               <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>{t('offlineQueue')}</Text>
-              <RefreshCw color={syncQueueCount > 0 ? colors.warning : colors.primary} size={18} />
+              <RefreshCw color={syncQueueCount > 0 ? '#D97706' : '#16A34A'} size={18} />
             </View>
             <Text style={[styles.kpiValue, { color: colors.foreground }]}>{syncQueueCount}</Text>
-            <Text style={[styles.kpiSub, { color: colors.mutedFg }]}>
-              {syncQueueCount > 0 ? (
-                <Text style={{ color: colors.warning, fontWeight: '700' }}>
-                  {t('awaitingInternet')}
-                </Text>
-              ) : (
-                <Text style={{ color: '#10B981', fontWeight: '700' }}>{t('allDataSynced')}</Text>
-              )}
+            <Text style={[styles.kpiSub, { color: syncQueueCount > 0 ? '#D97706' : '#16A34A' }]}>
+              {syncQueueCount > 0 ? t('awaitingInternet') : t('allDataSynced')}
             </Text>
-          </Card>
+          </View>
         </View>
 
         {/* Revenue Trend Chart */}
@@ -239,11 +199,11 @@ export function DashboardScreen({ navigation }: any) {
           <View style={styles.chartLegend}>
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: colors.primary }]} />
-              <Text style={{ color: colors.mutedFg, fontSize: 11 }}>{t('revenue')} (₹)</Text>
+              <Text style={{ color: colors.mutedFg, fontSize: 13 }}>{t('revenue')} (₹)</Text>
             </View>
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: colors.destructive }]} />
-              <Text style={{ color: colors.mutedFg, fontSize: 11 }}>{t('expenses')} (₹)</Text>
+              <Text style={{ color: colors.mutedFg, fontSize: 13 }}>{t('expenses')} (₹)</Text>
             </View>
           </View>
         </Card>
@@ -276,7 +236,7 @@ export function DashboardScreen({ navigation }: any) {
             recentTxns.map((txn, index) => {
               const farmerTitle = txn.partyName || (txn as any).farmer || t('generalFarmer');
               const cropOrCategory = txn.category || (txn as any).crop || t('general');
-              const dateStr = getTxDateString(txn) || t('today');
+              const dateStr = fmtDMY(getTxDateString(txn)) || t('today');
               return (
                 <View
                   key={txn.id || index}
@@ -315,7 +275,7 @@ export function DashboardScreen({ navigation }: any) {
           )}
         </Card>
 
-        <View style={{ height: 40 }} />
+        <View style={{ height: 80 }} />
       </ScrollView>
 
       {/* Quick Add Transaction Modal identical to FarmerLedger */}
@@ -396,20 +356,20 @@ export function DashboardScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  scroll: { paddingBottom: 60 },
+  scroll: { paddingBottom: 100 },
   header: { marginTop: 12, marginBottom: 16 },
   title: { fontSize: 24, fontWeight: '700', letterSpacing: -0.5 },
   subtitle: { fontSize: 13, marginTop: 2 },
   kpiGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 16 },
-  kpiCard: { width: '48.5%', marginBottom: 10, minHeight: 96 },
+  kpiCard: { width: '48.5%' as any, marginBottom: 10, minHeight: 96, borderRadius: 24, padding: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 },
   kpiHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  kpiLabel: { fontSize: 11, fontWeight: '600', letterSpacing: 0.5, textTransform: 'uppercase' },
-  kpiValue: { fontSize: 22, fontWeight: '800', marginVertical: 4 },
-  kpiSub: { fontSize: 10, fontWeight: '500' },
+  kpiLabel: { fontSize: 13, fontWeight: '600', letterSpacing: 0.3, textTransform: 'uppercase' },
+  kpiValue: { fontSize: 22, fontWeight: '800', marginVertical: 4, letterSpacing: -0.5 },
+  kpiSub: { fontSize: 13, fontWeight: '600' },
   chartCard: { marginBottom: 16 },
   chartHeader: { marginBottom: 8 },
   sectionTitle: { fontSize: 16, fontWeight: '700' },
-  chartDesc: { fontSize: 11, marginTop: 2 },
+  chartDesc: { fontSize: 13, marginTop: 2 },
   chartWrapper: { alignItems: 'center', marginVertical: 8 },
   chartLegend: { flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 6 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
@@ -419,7 +379,7 @@ const styles = StyleSheet.create({
   addButton: { width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   txnRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1 },
   txnFarmer: { fontSize: 13, fontWeight: '700' },
-  txnMeta: { fontSize: 11, marginTop: 2 },
+  txnMeta: { fontSize: 13, marginTop: 2 },
   txnAmount: { fontSize: 15, fontWeight: '700', marginBottom: 4 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
   modalCard: { width: '100%', maxWidth: 440, alignSelf: 'center' },

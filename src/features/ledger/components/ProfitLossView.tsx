@@ -248,7 +248,7 @@ export function ProfitLossView() {
               },
             ]}
           >
-            <Text style={{ color: selectedPlotId === 'all' ? '#FFF' : colors.foreground, fontSize: 11, fontWeight: '700' }}>
+            <Text style={{ color: selectedPlotId === 'all' ? '#FFF' : colors.foreground, fontSize: 13, fontWeight: '700' }}>
               {t('allPlots')}
             </Text>
           </TouchableOpacity>
@@ -264,7 +264,7 @@ export function ProfitLossView() {
                 },
               ]}
             >
-              <Text style={{ color: selectedPlotId === pl.id ? '#FFF' : colors.foreground, fontSize: 11, fontWeight: '700' }}>
+              <Text style={{ color: selectedPlotId === pl.id ? '#FFF' : colors.foreground, fontSize: 13, fontWeight: '700' }}>
                 {pl.name} (Gat #{pl.gatNumber})
               </Text>
             </TouchableOpacity>
@@ -285,7 +285,7 @@ export function ProfitLossView() {
               },
             ]}
           >
-            <Text style={{ color: selectedCropId === 'all' ? '#FFF' : colors.foreground, fontSize: 11, fontWeight: '700' }}>
+            <Text style={{ color: selectedCropId === 'all' ? '#FFF' : colors.foreground, fontSize: 13, fontWeight: '700' }}>
               {t('allCrops')}
             </Text>
           </TouchableOpacity>
@@ -301,7 +301,7 @@ export function ProfitLossView() {
                 },
               ]}
             >
-              <Text style={{ color: selectedCropId === cr.id ? '#FFF' : colors.foreground, fontSize: 11, fontWeight: '700' }}>
+              <Text style={{ color: selectedCropId === cr.id ? '#FFF' : colors.foreground, fontSize: 13, fontWeight: '700' }}>
                 {cr.name}
               </Text>
             </TouchableOpacity>
@@ -310,17 +310,21 @@ export function ProfitLossView() {
       )}
 
       {/* Primary KPI Hero Card: Net Farm Profit & Margin */}
-      <Card
+      <View
         style={{
-          borderWidth: 2,
-          borderColor: pnl.netProfit >= 0 ? colors.primary : colors.destructive,
-          backgroundColor: pnl.netProfit >= 0 ? colors.primary + '10' : colors.destructive + '10',
+          borderRadius: 24,
+          backgroundColor: colors.card,
           marginBottom: 12,
+          padding: 16,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.12,
+          shadowRadius: 8,
+          elevation: 4,
         }}
-        padding={16}
       >
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text style={{ color: colors.foreground, fontSize: 12, fontWeight: '700', textTransform: 'uppercase' }}>
+          <Text style={{ color: colors.mutedFg, fontSize: 12, fontWeight: '700', textTransform: 'uppercase' }}>
             {t('netFarmProfit')}
           </Text>
           <Badge
@@ -331,7 +335,7 @@ export function ProfitLossView() {
 
         <Text
           style={{
-            color: pnl.netProfit >= 0 ? colors.primary : colors.destructive,
+            color: pnl.netProfit >= 0 ? '#16A34A' : '#DC2626',
             fontSize: 28,
             fontWeight: '900',
             marginTop: 6,
@@ -341,14 +345,14 @@ export function ProfitLossView() {
         </Text>
 
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border }}>
-          <Text style={{ color: colors.mutedFg, fontSize: 11 }}>
-            {t('revenue')}: <Text style={{ color: colors.primary, fontWeight: '700' }}>{fmt(pnl.totalRevenue)}</Text>
+          <Text style={{ color: colors.mutedFg, fontSize: 13 }}>
+            {t('revenue')}: <Text style={{ color: '#16A34A', fontWeight: '700' }}>{fmt(pnl.totalRevenue)}</Text>
           </Text>
-          <Text style={{ color: colors.mutedFg, fontSize: 11 }}>
-            {t('expenses')}: <Text style={{ color: colors.destructive, fontWeight: '700' }}>{fmt(pnl.directCosts + pnl.indirectCosts)}</Text>
+          <Text style={{ color: colors.mutedFg, fontSize: 13 }}>
+            {t('expenses')}: <Text style={{ color: '#DC2626', fontWeight: '700' }}>{fmt(pnl.directCosts + pnl.indirectCosts)}</Text>
           </Text>
         </View>
-      </Card>
+      </View>
 
       {/* A. Revenue Card */}
       <Card style={{ marginBottom: 10 }} padding={14}>
@@ -417,39 +421,44 @@ export function ProfitLossView() {
       </Card>
 
       {/* C. Gross Margin Card */}
-      <Card
+      <View
         style={{
           marginBottom: 10,
-          borderColor: colors.info + '40',
-          backgroundColor: colors.info + '08',
+          borderRadius: 24,
+          backgroundColor: colors.card,
+          padding: 14,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.12,
+          shadowRadius: 8,
+          elevation: 4,
         }}
-        padding={14}
       >
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <View>
-            <Text style={{ color: colors.info, fontSize: 13, fontWeight: '700' }}>
+            <Text style={{ color: '#2563EB', fontSize: 13, fontWeight: '700' }}>
               C. {t('grossProfit')}
             </Text>
-            <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 2 }}>
+            <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
               {t('revenueLessDirectCosts')}
             </Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
             <Text
               style={{
-                color: pnl.grossProfit >= 0 ? colors.primary : colors.destructive,
+                color: pnl.grossProfit >= 0 ? '#16A34A' : '#DC2626',
                 fontSize: 16,
                 fontWeight: '800',
               }}
             >
               {fmt(pnl.grossProfit)}
             </Text>
-            <Text style={{ color: colors.info, fontSize: 11, fontWeight: '700' }}>
+            <Text style={{ color: '#2563EB', fontSize: 13, fontWeight: '700' }}>
               {pnl.grossMargin.toFixed(1)}% {t('margin')}
             </Text>
           </View>
         </View>
-      </Card>
+      </View>
 
       {/* D. Indirect Costs */}
       <Card style={{ marginBottom: 10 }} padding={14}>
@@ -458,7 +467,7 @@ export function ProfitLossView() {
             <Text style={[styles.sectionHeading, { color: colors.warning }]}>
               D. {t('indirectCosts')}
             </Text>
-            <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 2 }}>
+            <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
               {t('indirectCostsDesc')}
             </Text>
           </View>

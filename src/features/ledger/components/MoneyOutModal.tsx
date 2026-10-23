@@ -49,7 +49,6 @@ export function MoneyOutModal({ visible, onClose, initialData, plotId, cropId }:
   const [partyName, setPartyName] = useState('');
   const [billNumber, setBillNumber] = useState('');
   const [notes, setNotes] = useState('');
-  const [dueDate, setDueDate] = useState('');
   const [selectedPlotId, setSelectedPlotId] = useState(plotId || '');
   const [selectedCropId, setSelectedCropId] = useState(cropId || '');
 
@@ -98,7 +97,6 @@ export function MoneyOutModal({ visible, onClose, initialData, plotId, cropId }:
         cropSeason: selectedCrop?.season,
         billNumber: billNumber || undefined,
         notes: notes || undefined,
-        dueDate: paymentMode === 'credit' ? (dueDate || undefined) : undefined,
         pendingAmount: paymentMode === 'credit' ? amt : undefined,
       });
       onClose();
@@ -198,9 +196,6 @@ export function MoneyOutModal({ visible, onClose, initialData, plotId, cropId }:
               <Text style={[styles.label, { color: colors.foreground }]}>{t('paymentMode')}</Text>
               {renderChips(PAYMENT_MODES, paymentMode, (v) => setPaymentMode(v as PaymentMode))}
 
-              {paymentMode === 'credit' && (
-                <DatePickerInput label={t('dueDate')} value={dueDate} onChange={setDueDate} />
-              )}
 
               <Input label={t('partyName')} value={partyName} onChangeText={setPartyName} placeholder={t('optional')} />
               <Input label={t('billNumber')} value={billNumber} onChangeText={setBillNumber} placeholder={t('optional')} />

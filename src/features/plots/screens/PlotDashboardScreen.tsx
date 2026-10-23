@@ -9,6 +9,7 @@ import { Button } from '../../../components/ui/Button';
 import { Badge } from '../../../components/ui/Badge';
 import { AddCropModal } from '../../crops/components/AddCropModal';
 import { ArrowLeft, Sprout } from 'lucide-react-native';
+import { fmtDMY } from '../../../shared/utils/helpers';
 
 export function PlotDashboardScreen({ route, navigation }: any) {
   const { plotId } = route.params;
@@ -75,7 +76,7 @@ export function PlotDashboardScreen({ route, navigation }: any) {
           </View>
           <View style={styles.detailRow}>
             <Text style={{ color: colors.mutedFg }}>{t('irrigationType')}</Text>
-            <Text style={{ color: colors.foreground, fontWeight: '700' }}>{plot.irrigationType}</Text>
+            <Text style={{ color: colors.foreground, fontWeight: '700' }}>{t(plot.irrigationType) || plot.irrigationType}</Text>
           </View>
           <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
             <Text style={{ color: colors.mutedFg }}>{t('waterAvailability')}</Text>
@@ -117,7 +118,7 @@ export function PlotDashboardScreen({ route, navigation }: any) {
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
               {t('crops')} ({plotCrops.length})
             </Text>
-            <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 2 }}>
+            <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
               {t('activeAndHarvestedCrops')}
             </Text>
           </View>
@@ -156,7 +157,7 @@ export function PlotDashboardScreen({ route, navigation }: any) {
                       {crop.cropType} {crop.variety ? `— ${crop.variety}` : ''}
                     </Text>
                     <Text style={{ color: colors.mutedFg, fontSize: 12, marginTop: 3 }}>
-                      {crop.area} {crop.areaUnit || 'acre'} • {t(crop.season.toLowerCase()) || crop.season} • {crop.sowingDate}
+                      {crop.area} {t(crop.areaUnit || 'acre')} • {t(crop.season.toLowerCase()) || crop.season} • {fmtDMY(crop.sowingDate)}
                     </Text>
                   </View>
                   <Badge
@@ -192,9 +193,9 @@ const styles = StyleSheet.create({
   topBar: { flexDirection: 'row', alignItems: 'center', marginTop: 12, marginBottom: 12 },
   backBtn: { width: 36, height: 36, borderRadius: 10, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 20, fontWeight: '700' },
-  subtitle: { fontSize: 11, marginTop: 2 },
+  subtitle: { fontSize: 13, marginTop: 2 },
   gatBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, borderWidth: 1 },
-  gatText: { fontSize: 11, fontWeight: '700' },
+  gatText: { fontSize: 13, fontWeight: '700' },
   detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'rgba(0,0,0,0.06)' },
   sectionTitle: { fontSize: 15, fontWeight: '700' },
   progressBar: { height: 8, borderRadius: 4, overflow: 'hidden', marginTop: 10, marginBottom: 8 },

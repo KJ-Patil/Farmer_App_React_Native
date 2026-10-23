@@ -18,7 +18,7 @@ import { ScreenLayout } from '../../../components/layout/ScreenLayout';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
-import { Sparkles, Edit3, X, Check, Globe, Moon, Sun } from 'lucide-react-native';
+import { Sparkles, Edit3, X, Check, Globe, Moon, Sun, Crown, Star, Zap } from 'lucide-react-native';
 
 export function SettingsScreen() {
   const { t, i18n } = useTranslation();
@@ -109,7 +109,7 @@ export function SettingsScreen() {
                 +91 {user?.mobileNumber}
               </Text>
               {user?.emailId ? (
-                <Text style={{ color: colors.mutedFg, fontSize: 11, marginTop: 1 }}>
+                <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 1 }}>
                   {user.emailId}
                 </Text>
               ) : null}
@@ -117,12 +117,15 @@ export function SettingsScreen() {
               <View
                 style={[
                   styles.membershipBadge,
-                  { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' },
+                  {
+                    backgroundColor: user?.membershipType === 'premium' ? '#EDE9FE' : user?.membershipType === 'gold' ? '#FEF3C7' : colors.primary + '15',
+                    borderColor: user?.membershipType === 'premium' ? '#7C3AED30' : user?.membershipType === 'gold' ? '#D9770630' : colors.primary + '30',
+                  },
                 ]}
               >
-                <Sparkles color={colors.primary} size={12} />
-                <Text style={[styles.membershipText, { color: colors.primary }]}>
-                  {user?.membershipType === 'gold' ? t('goldAccount') : t('freeAccount')}
+                <Sparkles color={user?.membershipType === 'premium' ? '#7C3AED' : user?.membershipType === 'gold' ? '#D97706' : colors.primary} size={12} />
+                <Text style={[styles.membershipText, { color: user?.membershipType === 'premium' ? '#7C3AED' : user?.membershipType === 'gold' ? '#D97706' : colors.primary }]}>
+                  {user?.membershipType === 'premium' ? (t('premiumTier') || 'Premium') : user?.membershipType === 'gold' ? (t('goldTier') || 'Gold') : (t('freeAccount') || 'Free')}
                 </Text>
               </View>
             </View>
@@ -168,7 +171,7 @@ export function SettingsScreen() {
             </View>
           ))}
           {user?.geoLocation && (
-            <Text style={{ color: colors.primary, fontSize: 11, marginTop: 6 }}>
+            <Text style={{ color: colors.primary, fontSize: 13, marginTop: 6 }}>
               📍 GPS: {(user.geoLocation as any).latitude || user.geoLocation.lat},{' '}
               {(user.geoLocation as any).longitude || user.geoLocation.lng}
             </Text>
@@ -238,6 +241,149 @@ export function SettingsScreen() {
           </View>
         </Card>
 
+        {/* Subscription Plans */}
+        <Card style={{ marginTop: 12 }} padding={16}>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
+            {t('subscriptionPlan') || 'Subscription Plan'}
+          </Text>
+          <Text style={{ color: colors.mutedFg, fontSize: 13, marginBottom: 14 }}>
+            {t('choosePlanDesc') || 'Choose a plan that suits your farming needs'}
+          </Text>
+
+          {/* Free Tier */}
+          <TouchableOpacity
+            onPress={() => {
+              updateProfile({ membershipType: 'free' });
+              Alert.alert(t('success'), t('planUpdated') || 'Plan updated successfully');
+            }}
+            style={[
+              styles.planCard,
+              {
+                borderColor: user?.membershipType === 'free' || !user?.membershipType ? colors.primary : colors.border,
+                backgroundColor: user?.membershipType === 'free' || !user?.membershipType ? colors.primary + '08' : colors.card,
+              },
+            ]}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.planIcon, { backgroundColor: '#F1F5F9' }]}>
+              <Star color="#64748B" size={20} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: colors.foreground, fontSize: 15, fontWeight: '700' }}>
+                Free
+              </Text>
+              <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
+                {t('freeFeatures') || 'Basic features, limited reports'}
+              </Text>
+            </View>
+            <View style={{ alignItems: 'flex-end' }}>
+              <Text style={{ color: colors.primary, fontSize: 16, fontWeight: '800' }}>
+                {t('free') || 'Free'}
+              </Text>
+              {(user?.membershipType === 'free' || !user?.membershipType) && (
+                <View style={[styles.activeBadge, { backgroundColor: colors.primary }]}>
+                  <Check color="#FFF" size={10} />
+                  <Text style={{ color: '#FFF', fontSize: 10, fontWeight: '700', marginLeft: 2 }}>{t('active') || 'Active'}</Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+
+          {/* Gold Tier */}
+          <TouchableOpacity
+            onPress={() => {
+              Alert.alert(
+                t('upgradePlan') || 'Upgrade Plan',
+                (t('confirmUpgrade') || 'Upgrade to Gold for') + ' ₹50/' + (t('month') || 'month') + '?',
+                [
+                  { text: t('cancel'), style: 'cancel' },
+                  { text: t('upgrade') || 'Upgrade', onPress: () => {
+                    updateProfile({ membershipType: 'gold' });
+                    Alert.alert(t('success'), t('planUpdated') || 'Plan updated to Gold!');
+                  }},
+                ]
+              );
+            }}
+            style={[
+              styles.planCard,
+              {
+                borderColor: user?.membershipType === 'gold' ? '#D97706' : colors.border,
+                backgroundColor: user?.membershipType === 'gold' ? '#FEF3C7' : colors.card,
+              },
+            ]}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.planIcon, { backgroundColor: '#FEF3C7' }]}>
+              <Crown color="#D97706" size={20} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: colors.foreground, fontSize: 15, fontWeight: '700' }}>
+                Gold
+              </Text>
+              <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
+                {t('goldFeatures') || 'Full reports, WhatsApp share, party ledger'}
+              </Text>
+            </View>
+            <View style={{ alignItems: 'flex-end' }}>
+              <Text style={{ color: '#D97706', fontSize: 16, fontWeight: '800' }}>₹50</Text>
+              <Text style={{ color: colors.mutedFg, fontSize: 12 }}>/{t('month') || 'month'}</Text>
+              {user?.membershipType === 'gold' && (
+                <View style={[styles.activeBadge, { backgroundColor: '#D97706' }]}>
+                  <Check color="#FFF" size={10} />
+                  <Text style={{ color: '#FFF', fontSize: 10, fontWeight: '700', marginLeft: 2 }}>{t('active') || 'Active'}</Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+
+          {/* Premium Tier */}
+          <TouchableOpacity
+            onPress={() => {
+              Alert.alert(
+                t('upgradePlan') || 'Upgrade Plan',
+                (t('confirmUpgrade') || 'Upgrade to Premium for') + ' ₹90/' + (t('month') || 'month') + '?',
+                [
+                  { text: t('cancel'), style: 'cancel' },
+                  { text: t('upgrade') || 'Upgrade', onPress: () => {
+                    updateProfile({ membershipType: 'premium' });
+                    Alert.alert(t('success'), t('planUpdated') || 'Plan updated to Premium!');
+                  }},
+                ]
+              );
+            }}
+            style={[
+              styles.planCard,
+              {
+                borderColor: user?.membershipType === 'premium' ? '#7C3AED' : colors.border,
+                backgroundColor: user?.membershipType === 'premium' ? '#EDE9FE' : colors.card,
+              },
+            ]}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.planIcon, { backgroundColor: '#EDE9FE' }]}>
+              <Zap color="#7C3AED" size={20} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: colors.foreground, fontSize: 15, fontWeight: '700' }}>
+                Premium
+              </Text>
+              <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
+                {t('premiumFeatures') || 'AI insights, priority support, all features'}
+              </Text>
+            </View>
+            <View style={{ alignItems: 'flex-end' }}>
+              <Text style={{ color: '#7C3AED', fontSize: 16, fontWeight: '800' }}>₹90</Text>
+              <Text style={{ color: colors.mutedFg, fontSize: 12 }}>/{t('month') || 'month'}</Text>
+              {user?.membershipType === 'premium' && (
+                <View style={[styles.activeBadge, { backgroundColor: '#7C3AED' }]}>
+                  <Check color="#FFF" size={10} />
+                  <Text style={{ color: '#FFF', fontSize: 10, fontWeight: '700', marginLeft: 2 }}>{t('active') || 'Active'}</Text>
+                </View>
+              )}
+            </View>
+          </TouchableOpacity>
+        </Card>
+
         {/* Sign Out Button */}
         <Button
           title={t('signOut')}
@@ -301,7 +447,7 @@ const styles = StyleSheet.create({
   avatarText: { color: '#FFF', fontSize: 22, fontWeight: '700' },
   name: { fontSize: 17, fontWeight: '700' },
   membershipBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12, borderWidth: 1, marginTop: 6 },
-  membershipText: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase' },
+  membershipText: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase' },
   sectionTitle: { fontSize: 15, fontWeight: '700', marginBottom: 10 },
   detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 7, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'rgba(0,0,0,0.06)' },
   optionRow: { flexDirection: 'row', gap: 10 },
@@ -311,4 +457,7 @@ const styles = StyleSheet.create({
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   modalTitle: { fontSize: 17, fontWeight: '700' },
   modalActions: { flexDirection: 'row', gap: 10, marginTop: 16 },
+  planCard: { flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: 12, borderWidth: 1.5, marginBottom: 10, gap: 12 },
+  planIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  activeBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, marginTop: 4 },
 });

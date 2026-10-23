@@ -105,15 +105,15 @@ export const usePlotStore = create<PlotStore>((set, get) => ({
     }
     const now = Timestamp.now();
     const isoString = new Date().toISOString();
-    const data = {
+    const data: Record<string, any> = {
       ...plot,
       timestamp: isoString,
       createdAt: now,
       updatedAt: now,
-      location: plot.geoLocation
-        ? { latitude: plot.geoLocation.lat, longitude: plot.geoLocation.lng, address: 'Plot GPS', accuracy: 15 }
-        : undefined,
     };
+    if (plot.geoLocation) {
+      data.location = { latitude: plot.geoLocation.lat, longitude: plot.geoLocation.lng, address: 'Plot GPS', accuracy: 15 };
+    }
     const docRef = await addDoc(getPlotsRef(), data);
     const newPlot = { id: docRef.id, ...data } as Plot;
     set((s) => ({ plots: [newPlot, ...s.plots] }));
