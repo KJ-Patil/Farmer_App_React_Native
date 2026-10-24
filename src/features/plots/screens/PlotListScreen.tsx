@@ -9,6 +9,7 @@ import { Button } from '../../../components/ui/Button';
 import { Badge } from '../../../components/ui/Badge';
 import { AddPlotModal } from '../components/AddPlotModal';
 import { Layers, Droplets, Sparkles, Plus } from 'lucide-react-native';
+import { WaveHeader } from '../../../components/ui/WaveHeader';
 
 export function PlotListScreen({ navigation }: any) {
   const { t, i18n } = useTranslation();
@@ -21,26 +22,33 @@ export function PlotListScreen({ navigation }: any) {
   }, []);
 
   return (
-    <ScreenLayout>
-      <View style={styles.header}>
-        <View style={{ flex: 1, marginRight: 12 }}>
-          <Text style={[styles.title, { color: colors.foreground }]}>{t('plots')}</Text>
-        </View>
-        <Button
-          title={t('addPlot')}
-          onPress={() => setAddVisible(true)}
-          size="sm"
-          style={styles.addBtn}
-        />
-      </View>
+    <ScreenLayout noPadding noTopInset>
+      <WaveHeader
+        title={t('plots')}
+        stats={[
+          { value: plots.length, label: t('totalPlots') || 'Total' },
+          { value: `${plots.reduce((s, p) => s + (p.area || 0), 0)}`, label: t('acre') || 'Acres' },
+        ]}
+        gradientFrom="#2563EB"
+        gradientTo="#1E40AF"
+      />
 
       <FlatList
         data={plots}
         keyExtractor={(p) => p.id}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 16 }}
         refreshing={isLoading}
         onRefresh={fetchPlots}
+        ListHeaderComponent={
+          <View style={{ marginBottom: 8 }}>
+            <Button
+              title={`+ ${t('addPlot')}`}
+              onPress={() => setAddVisible(true)}
+              fullWidth
+            />
+          </View>
+        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={{ color: colors.mutedFg, textAlign: 'center', fontSize: 14 }}>
@@ -117,11 +125,11 @@ const styles = StyleSheet.create({
   plotCard: { marginBottom: 12 },
   plotCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   plotName: { fontSize: 16, fontWeight: '700' },
-  plotAreaSub: { fontSize: 12, fontWeight: '600', marginTop: 3 },
+  plotAreaSub: { fontSize: 13, fontWeight: '600', marginTop: 3 },
   divider: { height: 1, marginVertical: 12 },
   metaRow: { gap: 8 },
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  metaLabel: { fontSize: 12 },
-  metaValue: { fontSize: 12, fontWeight: '600' },
+  metaLabel: { fontSize: 13 },
+  metaValue: { fontSize: 13, fontWeight: '600' },
   emptyContainer: { paddingVertical: 48, alignItems: 'center' },
 });

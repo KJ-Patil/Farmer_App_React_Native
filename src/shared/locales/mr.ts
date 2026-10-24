@@ -79,6 +79,14 @@ export default {
   // Dashboard
   dashboardTitle: 'डॅशबोर्ड सारांश',
   dashboardSubtitle: 'किसान ईआरपी प्रणाली',
+  goodMorning: 'सुप्रभात',
+  goodAfternoon: 'शुभ दुपार',
+  goodEvening: 'शुभ संध्याकाळ',
+  welcomeBack: 'पुन्हा स्वागत',
+  todayOverview: 'आजचा तुमच्या शेताचा आढावा',
+  revenue: 'महसूल',
+  farmers: 'शेतकरी',
+  entries: 'नोंदी',
   totalRevenue: 'एकूण महसूल',
   activeFarmers: 'सक्रिय शेतकरी',
   inventoryValue: 'साठा मूल्य',
@@ -112,6 +120,7 @@ export default {
   moneyOut: 'पैसे गेले',
 
   // Plots
+  totalPlots: 'प्लॉट',
   addPlot: 'प्लॉट जोडा',
   plotName: 'प्लॉट नाव',
   gatNumber: 'गट क्रमांक',
@@ -409,7 +418,6 @@ export default {
   generalFarmer: 'सामान्य शेतकरी',
   generalSupplier: 'सामान्य पुरवठादार',
   margin: 'मार्जिन',
-  revenue: 'महसूल / उत्पन्न',
   both: 'दोन्ही',
   enterFarmerNameAndAmount: 'कृपया शेतकऱ्याचे नाव आणि रक्कम टाका.',
   enterValidPositiveAmount: 'कृपया वैध धन रक्कम टाका.',

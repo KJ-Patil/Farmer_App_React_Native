@@ -9,6 +9,7 @@ import {
   Alert,
   useWindowDimensions,
   Dimensions,
+  StatusBar,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../app/providers/ThemeProvider';
@@ -31,10 +32,14 @@ import {
   RefreshCw,
   Plus,
   X,
+  Sun,
+  Sunset,
+  Moon,
 } from 'lucide-react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const WAVE_HEIGHT = 160;
+const STATUS_BAR_HEIGHT = StatusBar.currentHeight || 44;
+const WAVE_HEIGHT = 220;
 
 const CROPS_LIST = ['Wheat', 'Cotton', 'Soybean', 'Rice', 'Sugarcane'];
 
@@ -108,6 +113,23 @@ export function DashboardScreen({ navigation }: any) {
 
   const formatCurrency = (v: number) => `₹${v.toLocaleString('en-IN')}`;
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return { text: t('goodMorning'), Icon: Sun, iconColor: '#FDE047' };
+    if (hour < 17) return { text: t('goodAfternoon'), Icon: Sunset, iconColor: '#FB923C' };
+    return { text: t('goodEvening'), Icon: Moon, iconColor: '#E2E8F0' };
+  };
+
+  const greeting = getGreeting();
+  const firstName = user?.fullName?.split(' ')[0] || '';
+
+  const todayFormatted = new Date().toLocaleDateString(i18n.language === 'mr' ? 'mr-IN' : 'en-IN', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
   const handleAddTransaction = async () => {
     if (!modalFarmer.trim() || !modalAmount.trim()) {
       Alert.alert(t('required'), t('enterFarmerNameAndAmount'));
@@ -152,22 +174,49 @@ export function DashboardScreen({ navigation }: any) {
             <Defs>
               <LinearGradient id="dashWaveGrad" x1="0" y1="0" x2="1" y2="1">
                 <Stop offset="0" stopColor="#16A34A" />
-                <Stop offset="1" stopColor="#15803D" />
+                <Stop offset="1" stopColor="#0F766E" />
               </LinearGradient>
             </Defs>
             <Path
-              d={`M0,0 L${SCREEN_WIDTH},0 L${SCREEN_WIDTH},${WAVE_HEIGHT * 0.65} Q${SCREEN_WIDTH * 0.75},${WAVE_HEIGHT * 0.95} ${SCREEN_WIDTH * 0.5},${WAVE_HEIGHT * 0.78} Q${SCREEN_WIDTH * 0.25},${WAVE_HEIGHT * 0.6} 0,${WAVE_HEIGHT * 0.85} Z`}
+              d={`M0,0 L${SCREEN_WIDTH},0 L${SCREEN_WIDTH},${WAVE_HEIGHT * 0.7} Q${SCREEN_WIDTH * 0.75},${WAVE_HEIGHT * 0.95} ${SCREEN_WIDTH * 0.5},${WAVE_HEIGHT * 0.82} Q${SCREEN_WIDTH * 0.25},${WAVE_HEIGHT * 0.68} 0,${WAVE_HEIGHT * 0.88} Z`}
               fill="url(#dashWaveGrad)"
             />
             <Path
-              d={`M0,0 L${SCREEN_WIDTH},0 L${SCREEN_WIDTH},${WAVE_HEIGHT * 0.55} Q${SCREEN_WIDTH * 0.65},${WAVE_HEIGHT * 0.82} ${SCREEN_WIDTH * 0.4},${WAVE_HEIGHT * 0.7} Q${SCREEN_WIDTH * 0.15},${WAVE_HEIGHT * 0.58} 0,${WAVE_HEIGHT * 0.75} Z`}
+              d={`M0,0 L${SCREEN_WIDTH},0 L${SCREEN_WIDTH},${WAVE_HEIGHT * 0.6} Q${SCREEN_WIDTH * 0.65},${WAVE_HEIGHT * 0.85} ${SCREEN_WIDTH * 0.4},${WAVE_HEIGHT * 0.73} Q${SCREEN_WIDTH * 0.15},${WAVE_HEIGHT * 0.6} 0,${WAVE_HEIGHT * 0.78} Z`}
               fill="#22C55E"
-              opacity={0.3}
+              opacity={0.25}
+            />
+            <Path
+              d={`M0,0 L${SCREEN_WIDTH},0 L${SCREEN_WIDTH},${WAVE_HEIGHT * 0.5} Q${SCREEN_WIDTH * 0.55},${WAVE_HEIGHT * 0.72} ${SCREEN_WIDTH * 0.3},${WAVE_HEIGHT * 0.6} Q${SCREEN_WIDTH * 0.1},${WAVE_HEIGHT * 0.5} 0,${WAVE_HEIGHT * 0.65} Z`}
+              fill="#4ADE80"
+              opacity={0.15}
             />
           </Svg>
-          <View style={styles.waveTextOverlay}>
-            <Text style={styles.waveTitle}>{t('dashboardTitle')}</Text>
-            <Text style={styles.waveSubtitle}>{t('dashboardSubtitle')}</Text>
+          <View style={[styles.waveTextOverlay, { paddingTop: STATUS_BAR_HEIGHT + 12 }]}>
+            <View style={styles.greetingRow}>
+              <greeting.Icon size={20} color={greeting.iconColor} />
+              <Text style={styles.greetingText}>
+                {greeting.text}{firstName ? `, ${firstName}` : ''}
+              </Text>
+            </View>
+            <Text style={styles.waveDate}>{todayFormatted}</Text>
+
+            <View style={styles.waveStatRow}>
+              <View style={styles.waveStatItem}>
+                <Text style={styles.waveStatValue}>{formatCurrency(totalRevenue)}</Text>
+                <Text style={styles.waveStatLabel}>{t('revenue')}</Text>
+              </View>
+              <View style={styles.waveStatDivider} />
+              <View style={styles.waveStatItem}>
+                <Text style={styles.waveStatValue}>{uniqueFarmers}</Text>
+                <Text style={styles.waveStatLabel}>{t('farmers')}</Text>
+              </View>
+              <View style={styles.waveStatDivider} />
+              <View style={styles.waveStatItem}>
+                <Text style={styles.waveStatValue}>{transactions.length}</Text>
+                <Text style={styles.waveStatLabel}>{t('entries')}</Text>
+              </View>
+            </View>
           </View>
         </View>
 
@@ -225,11 +274,11 @@ export function DashboardScreen({ navigation }: any) {
           <View style={styles.chartLegend}>
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: colors.primary }]} />
-              <Text style={{ color: colors.mutedFg, fontSize: 13 }}>{t('revenue')} (₹)</Text>
+              <Text style={{ color: colors.mutedFg, fontSize: 12 }}>{t('revenue')} (₹)</Text>
             </View>
             <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: colors.destructive }]} />
-              <Text style={{ color: colors.mutedFg, fontSize: 13 }}>{t('expenses')} (₹)</Text>
+              <Text style={{ color: colors.mutedFg, fontSize: 12 }}>{t('expenses')} (₹)</Text>
             </View>
           </View>
         </Card>
@@ -385,14 +434,20 @@ export function DashboardScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   scroll: { paddingBottom: 100 },
   waveContainer: { position: 'relative', width: '100%', height: WAVE_HEIGHT },
-  waveTextOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', paddingHorizontal: 20, paddingTop: 8 },
-  waveTitle: { fontSize: 24, fontWeight: '700', letterSpacing: -0.5, color: '#FFFFFF' },
-  waveSubtitle: { fontSize: 13, marginTop: 2, color: 'rgba(255,255,255,0.85)' },
-  contentPadding: { paddingHorizontal: 16 },
+  waveTextOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, paddingHorizontal: 20 },
+  greetingRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  greetingText: { fontSize: 20, fontWeight: '700', color: '#FFFFFF', letterSpacing: -0.3 },
+  waveDate: { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 3, fontWeight: '500' },
+  waveStatRow: { flexDirection: 'row', alignItems: 'center', marginTop: 16, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 14, paddingVertical: 10, paddingHorizontal: 6 },
+  waveStatItem: { flex: 1, alignItems: 'center' },
+  waveStatValue: { fontSize: 16, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.3 },
+  waveStatLabel: { fontSize: 11, color: 'rgba(255,255,255,0.85)', marginTop: 2, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.3 },
+  waveStatDivider: { width: 1, height: 28, backgroundColor: 'rgba(255,255,255,0.3)' },
+  contentPadding: { paddingHorizontal: 16, marginTop: -8 },
   kpiGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 16 },
   kpiCard: { width: '48.5%' as any, marginBottom: 10, minHeight: 96, borderRadius: 24, padding: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 },
   kpiHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  kpiLabel: { fontSize: 13, fontWeight: '600', letterSpacing: 0.3, textTransform: 'uppercase' },
+  kpiLabel: { fontSize: 12, fontWeight: '600', letterSpacing: 0.3, textTransform: 'uppercase' },
   kpiValue: { fontSize: 22, fontWeight: '800', marginVertical: 4, letterSpacing: -0.5 },
   kpiSub: { fontSize: 13, fontWeight: '600' },
   chartCard: { marginBottom: 16 },
@@ -405,17 +460,17 @@ const styles = StyleSheet.create({
   legendDot: { width: 10, height: 3, borderRadius: 2 },
   feedCard: { marginBottom: 20 },
   feedHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  addButton: { width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  addButton: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   txnRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1 },
-  txnFarmer: { fontSize: 13, fontWeight: '700' },
-  txnMeta: { fontSize: 13, marginTop: 2 },
-  txnAmount: { fontSize: 15, fontWeight: '700' },
+  txnFarmer: { fontSize: 14, fontWeight: '700' },
+  txnMeta: { fontSize: 12, marginTop: 2 },
+  txnAmount: { fontSize: 16, fontWeight: '700' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
   modalCard: { width: '100%', maxWidth: 440, alignSelf: 'center' },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   modalTitle: { fontSize: 17, fontWeight: '700' },
-  inputLabel: { fontSize: 12, fontWeight: '600', marginBottom: 6, marginTop: 10 },
+  inputLabel: { fontSize: 13, fontWeight: '600', marginBottom: 6, marginTop: 10 },
   cropSelector: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 12 },
-  cropChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1 },
+  cropChip: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 8, borderWidth: 1 },
   modalActions: { flexDirection: 'row', gap: 10, marginTop: 16 },
 });

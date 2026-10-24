@@ -18,6 +18,7 @@ import { CreditTrackerView } from '../components/CreditTrackerView';
 import { TransactionFilterBar, TransactionFilters } from '../components/TransactionFilterBar';
 import { fmtDMY } from '../../../shared/utils/helpers';
 import { BookOpen, ScanLine, ArrowDownLeft, ArrowUpRight, List, Wallet, TrendingUp, FileText, Users, CreditCard } from 'lucide-react-native';
+import { WaveHeader } from '../../../components/ui/WaveHeader';
 
 type TabKey = 'all' | 'income' | 'pnl' | 'reports' | 'party' | 'credit';
 
@@ -70,7 +71,17 @@ export function LedgerScreen({ navigation }: any) {
   ];
 
   return (
-    <ScreenLayout noPadding>
+    <ScreenLayout noPadding noTopInset>
+      <WaveHeader
+        title={t('ledger')}
+        stats={[
+          { value: `₹${transactions.reduce((s, tx) => s + (tx.type === 'income' ? tx.amount : 0), 0).toLocaleString('en-IN')}`, label: t('revenue') },
+          { value: `₹${transactions.reduce((s, tx) => s + (tx.type === 'expense' ? tx.amount : 0), 0).toLocaleString('en-IN')}`, label: t('expenses') },
+          { value: transactions.length, label: t('entries') },
+        ]}
+        gradientFrom="#D97706"
+        gradientTo="#B45309"
+      />
       <View style={[styles.tabBarOuter, { backgroundColor: colors.background }]}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabContent}>
           {tabDefs.map((tab) => {
@@ -116,19 +127,19 @@ export function LedgerScreen({ navigation }: any) {
               <View>
                 <View style={styles.actionGrid}>
                   <TouchableOpacity onPress={() => setMoneyInVisible(true)} style={[styles.actionBtn, { backgroundColor: colors.card }]} activeOpacity={0.7}>
-                    <View style={[styles.actionIcon, { backgroundColor: '#DCFCE7' }]}><ArrowDownLeft color="#16A34A" size={18} /></View>
+                    <View style={[styles.actionIcon, { backgroundColor: '#DCFCE7' }]}><ArrowDownLeft color="#16A34A" size={20} /></View>
                     <Text style={[styles.actionLabel, { color: colors.foreground }]} numberOfLines={2}>{t('moneyIn')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => setMoneyOutVisible(true)} style={[styles.actionBtn, { backgroundColor: colors.card }]} activeOpacity={0.7}>
-                    <View style={[styles.actionIcon, { backgroundColor: '#FEE2E2' }]}><ArrowUpRight color="#DC2626" size={18} /></View>
+                    <View style={[styles.actionIcon, { backgroundColor: '#FEE2E2' }]}><ArrowUpRight color="#DC2626" size={20} /></View>
                     <Text style={[styles.actionLabel, { color: colors.foreground }]} numberOfLines={2}>{t('moneyOut')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => setOcrVisible(true)} style={[styles.actionBtn, { backgroundColor: colors.card }]} activeOpacity={0.7}>
-                    <View style={[styles.actionIcon, { backgroundColor: '#DBEAFE' }]}><ScanLine color="#2563EB" size={18} /></View>
+                    <View style={[styles.actionIcon, { backgroundColor: '#DBEAFE' }]}><ScanLine color="#2563EB" size={20} /></View>
                     <Text style={[styles.actionLabel, { color: colors.foreground }]} numberOfLines={2}>{t('scanBill')}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => setCustomLedgersVisible(true)} style={[styles.actionBtn, { backgroundColor: colors.card }]} activeOpacity={0.7}>
-                    <View style={[styles.actionIcon, { backgroundColor: '#FEF3C7' }]}><BookOpen color="#D97706" size={18} /></View>
+                    <View style={[styles.actionIcon, { backgroundColor: '#FEF3C7' }]}><BookOpen color="#D97706" size={20} /></View>
                     <Text style={[styles.actionLabel, { color: colors.foreground }]} numberOfLines={2}>{t('customLedgers')}</Text>
                   </TouchableOpacity>
                 </View>
@@ -194,7 +205,7 @@ const styles = StyleSheet.create({
   content: { flex: 1 },
   txnRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   actionGrid: { flexDirection: 'row', gap: 8, marginBottom: 12, marginTop: 8 },
-  actionBtn: { flex: 1, alignItems: 'center', paddingVertical: 10, borderRadius: 12, elevation: 1, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
-  actionIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  actionLabel: { fontSize: 11, fontWeight: '600', textAlign: 'center', marginTop: 4, lineHeight: 14 },
+  actionBtn: { flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 12, elevation: 1, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
+  actionIcon: { width: 40, height: 40, borderRadius: 11, alignItems: 'center', justifyContent: 'center', marginBottom: 5 },
+  actionLabel: { fontSize: 12, fontWeight: '600', textAlign: 'center', marginTop: 4, lineHeight: 15 },
 });

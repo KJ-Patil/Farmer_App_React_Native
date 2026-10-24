@@ -19,6 +19,7 @@ import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { Sparkles, Edit3, X, Check, Globe, Moon, Sun, Crown, Star, Zap } from 'lucide-react-native';
+import { WaveHeader } from '../../../components/ui/WaveHeader';
 
 export function SettingsScreen() {
   const { t, i18n } = useTranslation();
@@ -70,10 +71,16 @@ export function SettingsScreen() {
   const dobValue = user?.dateOfBirth || (user as any)?.dob || '—';
 
   return (
-    <ScreenLayout>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60 }}>
+    <ScreenLayout noPadding noTopInset>
+      <WaveHeader
+        title={t('settings')}
+        subtitle={user?.fullName || ''}
+        gradientFrom="#64748B"
+        gradientTo="#334155"
+      />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60, paddingHorizontal: 16 }}>
         <View style={styles.topHeader}>
-          <Text style={[styles.title, { color: colors.foreground }]}>{t('settings')}</Text>
+          <View />
           <Button
             title={t('edit')}
             onPress={() => {
@@ -199,7 +206,7 @@ export function SettingsScreen() {
                   style={{
                     color: i18n.language === lang ? colors.primary : colors.foreground,
                     fontWeight: '700',
-                    fontSize: 13,
+                    fontSize: 14,
                   }}
                 >
                   {lang === 'en' ? 'English' : 'मराठी'}
@@ -230,7 +237,7 @@ export function SettingsScreen() {
                   style={{
                     color: theme === mode ? colors.primary : colors.foreground,
                     fontWeight: '600',
-                    fontSize: 12,
+                    fontSize: 13,
                     textTransform: 'capitalize',
                   }}
                 >
@@ -449,7 +456,7 @@ const styles = StyleSheet.create({
   membershipBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12, borderWidth: 1, marginTop: 6 },
   membershipText: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase' },
   sectionTitle: { fontSize: 15, fontWeight: '700', marginBottom: 10 },
-  detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 7, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'rgba(0,0,0,0.06)' },
+  detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'rgba(0,0,0,0.06)' },
   optionRow: { flexDirection: 'row', gap: 10 },
   optionBtn: { flex: 1, paddingVertical: 12, alignItems: 'center', borderWidth: 1 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },

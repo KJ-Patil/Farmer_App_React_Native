@@ -54,8 +54,8 @@ export function Button({
 
   const borderColor = variant === 'outline' ? colors.border : 'transparent';
 
-  const padV = { sm: 8, md: 12, lg: 16 }[size];
-  const padH = { sm: 12, md: 20, lg: 28 }[size];
+  const padV = { sm: 9, md: 12, lg: 16 }[size];
+  const padH = { sm: 14, md: 20, lg: 28 }[size];
   const fontSize = { sm: 13, md: 15, lg: 17 }[size];
 
   return (

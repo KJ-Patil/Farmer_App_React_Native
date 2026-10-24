@@ -11,6 +11,7 @@ import { PurchaseStockModal } from '../components/PurchaseStockModal';
 import { IssueToCropModal } from '../components/IssueToCropModal';
 import { AddCustomItemModal } from '../components/AddCustomItemModal';
 import { Package, ShoppingCart, TrendingDown, Plus, Search, LayoutList } from 'lucide-react-native';
+import { WaveHeader } from '../../../components/ui/WaveHeader';
 import { fmtDMY } from '../../../shared/utils/helpers';
 
 type TabKey = 'stock' | 'purchase' | 'issues' | 'master';
@@ -109,7 +110,17 @@ export function InventoryScreen() {
   }, [items, purchases, consumptions]);
 
   return (
-    <ScreenLayout noPadding>
+    <ScreenLayout noPadding noTopInset>
+      <WaveHeader
+        title={t('inventory')}
+        stats={[
+          { value: `₹${summaryMetrics.totalStockValue.toLocaleString('en-IN')}`, label: t('stock') || 'Stock' },
+          { value: summaryMetrics.inStockCount, label: t('itemsInStock') || 'In Stock' },
+          { value: summaryMetrics.outOfStockCount, label: t('outOfStock') || 'Out' },
+        ]}
+        gradientFrom="#7C3AED"
+        gradientTo="#5B21B6"
+      />
       {/* Subtabs Bar */}
       <View style={[styles.tabBarOuter, { backgroundColor: colors.background }]}>
         <ScrollView
@@ -217,25 +228,30 @@ export function InventoryScreen() {
 
                 {/* Quick Action Buttons */}
                 <View style={styles.actionRow}>
-                  <Button
-                    title={`+ ${t('purchaseStock')}`}
+                  <TouchableOpacity
                     onPress={() => handleOpenPurchase()}
-                    size="sm"
-                    style={{ flex: 1 }}
-                  />
-                  <Button
-                    title={t('issueToCrop')}
+                    activeOpacity={0.7}
+                    style={[styles.actionBtn, { backgroundColor: '#2563EB', shadowColor: '#2563EB' }]}
+                  >
+                    <ShoppingCart color="#FFFFFF" size={15} />
+                    <Text style={styles.actionBtnText}>{t('purchaseStock')}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
                     onPress={() => handleOpenIssue()}
-                    variant="outline"
-                    size="sm"
-                    style={{ flex: 1 }}
-                  />
-                  <Button
-                    title={`+ ${t('new')}`}
+                    activeOpacity={0.7}
+                    style={[styles.actionBtn, { backgroundColor: '#DC2626', shadowColor: '#DC2626' }]}
+                  >
+                    <TrendingDown color="#FFFFFF" size={15} />
+                    <Text style={styles.actionBtnText}>{t('issueToCrop')}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
                     onPress={() => setAddItemVisible(true)}
-                    variant="ghost"
-                    size="sm"
-                  />
+                    activeOpacity={0.7}
+                    style={[styles.actionBtn, { backgroundColor: '#16A34A', shadowColor: '#16A34A' }]}
+                  >
+                    <Plus color="#FFFFFF" size={15} />
+                    <Text style={styles.actionBtnText}>{t('new')}</Text>
+                  </TouchableOpacity>
                 </View>
 
                 {/* Search & Category Filter */}
@@ -306,10 +322,10 @@ export function InventoryScreen() {
                     >
                       {item.currentStock || 0} {item.unit}
                     </Text>
-                    <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
+                    <Text style={{ color: colors.mutedFg, fontSize: 12, marginTop: 2 }}>
                       ₹{item.purchaseRate || 0}/{item.unit}
                     </Text>
-                    <Text style={{ color: colors.primary, fontSize: 13, fontWeight: '700', marginTop: 1 }}>
+                    <Text style={{ color: colors.primary, fontSize: 14, fontWeight: '700', marginTop: 1 }}>
                       ₹{((item.currentStock || 0) * (item.purchaseRate || 0)).toLocaleString('en-IN')}
                     </Text>
                   </View>
@@ -511,15 +527,17 @@ const styles = StyleSheet.create({
   tabPill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20, borderWidth: 1 },
   content: { flex: 1 },
   kpiGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  kpiCard: { width: '47%' as any, borderRadius: 24, padding: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 3 } as any, shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 },
-  kpiIconWrap: { width: 34, height: 34, borderRadius: 10, alignItems: 'center' as const, justifyContent: 'center' as const, marginBottom: 10 },
-  kpiValue: { fontSize: 20, fontWeight: '800' as const, letterSpacing: -0.5 },
-  kpiLabel: { fontSize: 13, fontWeight: '600' as const, marginTop: 2, textTransform: 'uppercase' as const, letterSpacing: 0.3 },
-  kpiSub: { fontSize: 13, fontWeight: '600' as const, marginTop: 4 },
-  actionRow: { flexDirection: 'row', gap: 10, marginTop: 14 },
+  kpiCard: { width: '47%' as any, borderRadius: 16, padding: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 } as any, shadowOpacity: 0.08, shadowRadius: 6, elevation: 3 },
+  kpiIconWrap: { width: 36, height: 36, borderRadius: 10, alignItems: 'center' as const, justifyContent: 'center' as const, marginBottom: 10 },
+  kpiValue: { fontSize: 20, fontWeight: '700' as const, letterSpacing: -0.3, lineHeight: 26 },
+  kpiLabel: { fontSize: 11, fontWeight: '600' as const, marginTop: 3, textTransform: 'uppercase' as const, letterSpacing: 0.8, lineHeight: 14 },
+  kpiSub: { fontSize: 12, fontWeight: '700' as const, marginTop: 6, lineHeight: 16 },
+  actionRow: { flexDirection: 'row', gap: 8, marginTop: 16, marginBottom: 4 },
+  actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 12, elevation: 3, shadowOffset: { width: 0, height: 2 } as any, shadowOpacity: 0.3, shadowRadius: 4 },
+  actionBtnText: { color: '#FFFFFF', fontSize: 12, fontWeight: '700', letterSpacing: 0.2 },
   searchBox: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, height: 42, borderRadius: 10, borderWidth: 1, marginTop: 12 },
-  searchInput: { flex: 1, marginLeft: 8, fontSize: 13 },
+  searchInput: { flex: 1, marginLeft: 8, fontSize: 14 },
   filterScroll: { marginVertical: 10 },
-  filterChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1, marginRight: 8 },
+  filterChip: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 8, borderWidth: 1, marginRight: 8 },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
 });

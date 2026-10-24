@@ -79,6 +79,14 @@ export default {
   // Dashboard
   dashboardTitle: 'Overview',
   dashboardSubtitle: 'Kisan ERP System',
+  goodMorning: 'Good Morning',
+  goodAfternoon: 'Good Afternoon',
+  goodEvening: 'Good Evening',
+  welcomeBack: 'Welcome back',
+  todayOverview: "Here's your farm overview for today",
+  revenue: 'Revenue',
+  farmers: 'Farmers',
+  entries: 'Entries',
   totalRevenue: 'Total Revenue',
   activeFarmers: 'Active Farmers',
   inventoryValue: 'Inventory Value',
@@ -112,6 +120,7 @@ export default {
   moneyOut: 'Money Out',
 
   // Plots
+  totalPlots: 'Plots',
   addPlot: 'Add Plot',
   plotName: 'Plot Name',
   gatNumber: 'Gat Number',
@@ -409,7 +418,6 @@ export default {
   generalFarmer: 'General Farmer',
   generalSupplier: 'General Supplier',
   margin: 'margin',
-  revenue: 'Revenue',
   both: 'Both',
   enterFarmerNameAndAmount: 'Please enter farmer name and amount.',
   enterValidPositiveAmount: 'Please enter a valid positive amount.',
