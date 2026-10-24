@@ -132,41 +132,21 @@ export function CreditTrackerView({ onOpenAddModal }: CreditTrackerViewProps) {
               )}
             </View>
 
-            {/* 3 KPI Cards */}
-            <View style={styles.kpiRow}>
-              <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
-                <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>
-                  {t('totalPendingDue')}
-                </Text>
-                <Text style={[styles.kpiVal, { color: '#DC2626' }]}>
-                  {fmt(totalPendingDue)}
-                </Text>
-                <Text style={{ color: '#DC2626', fontSize: 13, fontWeight: '600', marginTop: 4 }}>
-                  {creditPurchases.filter((tx) => (tx.pendingAmount ?? tx.amount) > 0).length}{' '}
-                  {t('pendingBills')}
-                </Text>
+            {/* 3 KPI Stats */}
+            <View style={[styles.kpiRow, { backgroundColor: colors.card, borderRadius: 12, padding: 14 }]}>
+              <View style={{ flex: 1, alignItems: 'center' }}>
+                <Text style={{ color: colors.mutedFg, fontSize: 12 }}>{t('totalPendingDue')}</Text>
+                <Text style={{ color: '#DC2626', fontSize: 17, fontWeight: '700', marginTop: 4 }}>{fmt(totalPendingDue)}</Text>
               </View>
-
-              <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
-                <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>
-                  {t('totalCreditTaken')}
-                </Text>
-                <Text style={[styles.kpiVal, { color: '#D97706' }]}>
-                  {fmt(totalCreditTaken)}
-                </Text>
-                <Text style={{ color: '#D97706', fontSize: 13, fontWeight: '600', marginTop: 4 }}>
-                  {creditPurchases.length} {t('totalBills')}
-                </Text>
+              <View style={{ width: 1, backgroundColor: colors.border }} />
+              <View style={{ flex: 1, alignItems: 'center' }}>
+                <Text style={{ color: colors.mutedFg, fontSize: 12 }}>{t('totalCreditTaken')}</Text>
+                <Text style={{ color: '#D97706', fontSize: 17, fontWeight: '700', marginTop: 4 }}>{fmt(totalCreditTaken)}</Text>
               </View>
-
-              <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
-                <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>
-                  {t('totalPaidBack')}
-                </Text>
-                <Text style={[styles.kpiVal, { color: '#16A34A' }]}>{fmt(totalPaidBack)}</Text>
-                <Text style={{ color: '#16A34A', fontSize: 13, fontWeight: '700', marginTop: 4 }}>
-                  {paidPercent.toFixed(0)}% {t('cleared')}
-                </Text>
+              <View style={{ width: 1, backgroundColor: colors.border }} />
+              <View style={{ flex: 1, alignItems: 'center' }}>
+                <Text style={{ color: colors.mutedFg, fontSize: 12 }}>{t('totalPaidBack')}</Text>
+                <Text style={{ color: '#16A34A', fontSize: 17, fontWeight: '700', marginTop: 4 }}>{fmt(totalPaidBack)}</Text>
               </View>
             </View>
 
@@ -202,20 +182,20 @@ export function CreditTrackerView({ onOpenAddModal }: CreditTrackerViewProps) {
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                    <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 14 }}>
+                    <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 15 }}>
                       {tx.partyName || tx.category}
                     </Text>
                     {tx.billNumber && <Badge text={`#${tx.billNumber}`} variant="default" />}
                   </View>
 
-                  <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
+                  <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 4 }}>
                     {tx.category} • {fmtDMY(tx.date)}
-                    {tx.plotName ? ` • 📍 ${tx.plotName}` : ''}
+                    {tx.plotName ? ` • ${tx.plotName}` : ''}
                   </Text>
 
                   {tx.dueDate && (
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 }}>
-                      <Calendar color={overdue ? colors.destructive : colors.mutedFg} size={12} />
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 }}>
+                      <Calendar color={overdue ? colors.destructive : colors.mutedFg} size={14} />
                       <Text
                         style={{
                           color: overdue ? colors.destructive : colors.mutedFg,
@@ -223,7 +203,7 @@ export function CreditTrackerView({ onOpenAddModal }: CreditTrackerViewProps) {
                           fontWeight: overdue ? '700' : '500',
                         }}
                       >
-                        {t('due')}: {tx.dueDate}{' '}
+                        {t('due')}: {fmtDMY(tx.dueDate)}{' '}
                         {overdue ? `(${t('overdue')})` : ''}
                       </Text>
                     </View>
@@ -231,19 +211,19 @@ export function CreditTrackerView({ onOpenAddModal }: CreditTrackerViewProps) {
                 </View>
 
                 <View style={{ alignItems: 'flex-end', marginLeft: 10 }}>
-                  <Text style={{ color: colors.mutedFg, fontSize: 13 }}>
+                  <Text style={{ color: colors.mutedFg, fontSize: 12 }}>
                     {t('pending')}
                   </Text>
                   <Text
                     style={{
                       color: isSettled ? colors.primary : colors.destructive,
                       fontWeight: '800',
-                      fontSize: 16,
+                      fontSize: 17,
                     }}
                   >
                     {fmt(pending)}
                   </Text>
-                  <Text style={{ color: colors.mutedFg, fontSize: 13 }}>
+                  <Text style={{ color: colors.mutedFg, fontSize: 12, marginTop: 2 }}>
                     {t('total')}: {fmt(tx.amount)}
                   </Text>
                 </View>
@@ -442,9 +422,6 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   mainTitle: { fontSize: 16, fontWeight: '700' },
   kpiRow: { flexDirection: 'row', gap: 8, marginVertical: 12 },
-  kpiCard: { flex: 1, borderRadius: 24, padding: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 },
-  kpiLabel: { fontSize: 13, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.3 },
-  kpiVal: { fontSize: 16, fontWeight: '800', marginTop: 6, letterSpacing: -0.5 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', padding: 20 },
   modalCard: { borderRadius: 16, borderWidth: 1, padding: 18 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },

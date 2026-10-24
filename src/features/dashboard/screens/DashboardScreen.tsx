@@ -8,6 +8,7 @@ import {
   Modal,
   Alert,
   useWindowDimensions,
+  Dimensions,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../app/providers/ThemeProvider';
@@ -23,6 +24,7 @@ import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { AreaChart } from '../../../components/ui/AreaChart';
 import { fmtDMY } from '../../../shared/utils/helpers';
+import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import {
   TrendingUp,
   Users,
@@ -30,6 +32,9 @@ import {
   Plus,
   X,
 } from 'lucide-react-native';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const WAVE_HEIGHT = 160;
 
 const CROPS_LIST = ['Wheat', 'Cotton', 'Soybean', 'Rice', 'Sugarcane'];
 
@@ -139,13 +144,34 @@ export function DashboardScreen({ navigation }: any) {
   };
 
   return (
-    <ScreenLayout>
+    <ScreenLayout noPadding noTopInset>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        {/* Header matching FarmerLedger */}
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.foreground }]}>{t('dashboardTitle')}</Text>
-          <Text style={[styles.subtitle, { color: colors.mutedFg }]}>{t('dashboardSubtitle')}</Text>
+        {/* Wave Header */}
+        <View style={styles.waveContainer}>
+          <Svg width={SCREEN_WIDTH} height={WAVE_HEIGHT} viewBox={`0 0 ${SCREEN_WIDTH} ${WAVE_HEIGHT}`}>
+            <Defs>
+              <LinearGradient id="dashWaveGrad" x1="0" y1="0" x2="1" y2="1">
+                <Stop offset="0" stopColor="#16A34A" />
+                <Stop offset="1" stopColor="#15803D" />
+              </LinearGradient>
+            </Defs>
+            <Path
+              d={`M0,0 L${SCREEN_WIDTH},0 L${SCREEN_WIDTH},${WAVE_HEIGHT * 0.65} Q${SCREEN_WIDTH * 0.75},${WAVE_HEIGHT * 0.95} ${SCREEN_WIDTH * 0.5},${WAVE_HEIGHT * 0.78} Q${SCREEN_WIDTH * 0.25},${WAVE_HEIGHT * 0.6} 0,${WAVE_HEIGHT * 0.85} Z`}
+              fill="url(#dashWaveGrad)"
+            />
+            <Path
+              d={`M0,0 L${SCREEN_WIDTH},0 L${SCREEN_WIDTH},${WAVE_HEIGHT * 0.55} Q${SCREEN_WIDTH * 0.65},${WAVE_HEIGHT * 0.82} ${SCREEN_WIDTH * 0.4},${WAVE_HEIGHT * 0.7} Q${SCREEN_WIDTH * 0.15},${WAVE_HEIGHT * 0.58} 0,${WAVE_HEIGHT * 0.75} Z`}
+              fill="#22C55E"
+              opacity={0.3}
+            />
+          </Svg>
+          <View style={styles.waveTextOverlay}>
+            <Text style={styles.waveTitle}>{t('dashboardTitle')}</Text>
+            <Text style={styles.waveSubtitle}>{t('dashboardSubtitle')}</Text>
+          </View>
         </View>
+
+        <View style={styles.contentPadding}>
 
         {/* 4 KPI Cards Grid */}
         <View style={styles.kpiGrid}>
@@ -254,7 +280,7 @@ export function DashboardScreen({ navigation }: any) {
                       {cropOrCategory} • {dateStr}
                     </Text>
                   </View>
-                  <View style={{ alignItems: 'flex-end' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                     <Text
                       style={[
                         styles.txnAmount,
@@ -276,6 +302,7 @@ export function DashboardScreen({ navigation }: any) {
         </Card>
 
         <View style={{ height: 80 }} />
+        </View>
       </ScrollView>
 
       {/* Quick Add Transaction Modal identical to FarmerLedger */}
@@ -357,9 +384,11 @@ export function DashboardScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   scroll: { paddingBottom: 100 },
-  header: { marginTop: 12, marginBottom: 16 },
-  title: { fontSize: 24, fontWeight: '700', letterSpacing: -0.5 },
-  subtitle: { fontSize: 13, marginTop: 2 },
+  waveContainer: { position: 'relative', width: '100%', height: WAVE_HEIGHT },
+  waveTextOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', paddingHorizontal: 20, paddingTop: 8 },
+  waveTitle: { fontSize: 24, fontWeight: '700', letterSpacing: -0.5, color: '#FFFFFF' },
+  waveSubtitle: { fontSize: 13, marginTop: 2, color: 'rgba(255,255,255,0.85)' },
+  contentPadding: { paddingHorizontal: 16 },
   kpiGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 16 },
   kpiCard: { width: '48.5%' as any, marginBottom: 10, minHeight: 96, borderRadius: 24, padding: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 },
   kpiHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -380,7 +409,7 @@ const styles = StyleSheet.create({
   txnRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1 },
   txnFarmer: { fontSize: 13, fontWeight: '700' },
   txnMeta: { fontSize: 13, marginTop: 2 },
-  txnAmount: { fontSize: 15, fontWeight: '700', marginBottom: 4 },
+  txnAmount: { fontSize: 15, fontWeight: '700' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
   modalCard: { width: '100%', maxWidth: 440, alignSelf: 'center' },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },

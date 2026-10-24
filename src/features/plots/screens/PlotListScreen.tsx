@@ -25,9 +25,6 @@ export function PlotListScreen({ navigation }: any) {
       <View style={styles.header}>
         <View style={{ flex: 1, marginRight: 12 }}>
           <Text style={[styles.title, { color: colors.foreground }]}>{t('plots')}</Text>
-          <Text style={[styles.subtitle, { color: colors.mutedFg }]}>
-            {t('plotListSubtitle')}
-          </Text>
         </View>
         <Button
           title={t('addPlot')}

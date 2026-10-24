@@ -10,7 +10,7 @@ import { Button } from '../../../components/ui/Button';
 import { PurchaseStockModal } from '../components/PurchaseStockModal';
 import { IssueToCropModal } from '../components/IssueToCropModal';
 import { AddCustomItemModal } from '../components/AddCustomItemModal';
-import { Package, ShoppingCart, TrendingDown, Plus, Search } from 'lucide-react-native';
+import { Package, ShoppingCart, TrendingDown, Plus, Search, LayoutList } from 'lucide-react-native';
 import { fmtDMY } from '../../../shared/utils/helpers';
 
 type TabKey = 'stock' | 'purchase' | 'issues' | 'master';
@@ -37,11 +37,11 @@ export function InventoryScreen() {
     fetchConsumptions();
   }, []);
 
-  const tabs: { key: TabKey; label: string }[] = [
-    { key: 'stock', label: t('liveStock') },
-    { key: 'purchase', label: t('purchaseRegister') },
-    { key: 'issues', label: t('materialIssues') },
-    { key: 'master', label: t('inputMaster') },
+  const tabDefs: { key: TabKey; label: string; Icon: typeof Package }[] = [
+    { key: 'stock', label: t('liveStock'), Icon: Package },
+    { key: 'purchase', label: t('purchaseRegister'), Icon: ShoppingCart },
+    { key: 'issues', label: t('materialIssues'), Icon: TrendingDown },
+    { key: 'master', label: t('inputMaster'), Icon: LayoutList },
   ];
 
   const filteredItems = useMemo(() => {
@@ -110,37 +110,46 @@ export function InventoryScreen() {
 
   return (
     <ScreenLayout noPadding>
-      {/* Subtabs Bar matching FarmerLedger */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={[styles.tabBar, { borderBottomColor: colors.border, backgroundColor: colors.card }]}
-        contentContainerStyle={styles.tabContent}
-      >
-        {tabs.map((tab) => (
-          <TouchableOpacity
-            key={tab.key}
-            onPress={() => setActiveTab(tab.key)}
-            style={[
-              styles.tab,
-              {
-                borderBottomColor: activeTab === tab.key ? colors.primary : 'transparent',
-                borderBottomWidth: 2,
-              },
-            ]}
-          >
-            <Text
-              style={{
-                fontSize: 13,
-                fontWeight: activeTab === tab.key ? '700' : '600',
-                color: activeTab === tab.key ? colors.primary : colors.mutedFg,
-              }}
-            >
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      {/* Subtabs Bar */}
+      <View style={[styles.tabBarOuter, { backgroundColor: colors.background }]}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabContent}
+        >
+          {tabDefs.map((tab) => {
+            const isActive = activeTab === tab.key;
+            const iconColor = isActive ? '#FFFFFF' : colors.mutedFg;
+            return (
+              <TouchableOpacity
+                key={tab.key}
+                onPress={() => setActiveTab(tab.key)}
+                activeOpacity={0.7}
+                style={[
+                  styles.tabPill,
+                  {
+                    backgroundColor: isActive ? colors.primary : colors.card,
+                    borderColor: isActive ? colors.primary : colors.border,
+                  },
+                ]}
+              >
+                <tab.Icon size={15} color={iconColor} />
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontWeight: '700',
+                    color: isActive ? '#FFFFFF' : colors.mutedFg,
+                    marginLeft: 5,
+                  }}
+                  numberOfLines={1}
+                >
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
 
       <View style={styles.content}>
         {/* TAB 1: LIVE STOCK */}
@@ -497,9 +506,9 @@ export function InventoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  tabBar: { maxHeight: 48, borderBottomWidth: 1 },
-  tabContent: { paddingHorizontal: 12, gap: 4 },
-  tab: { paddingHorizontal: 12, paddingVertical: 12 },
+  tabBarOuter: { paddingVertical: 10, borderBottomWidth: 0 },
+  tabContent: { paddingHorizontal: 14, gap: 8 },
+  tabPill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20, borderWidth: 1 },
   content: { flex: 1 },
   kpiGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   kpiCard: { width: '47%' as any, borderRadius: 24, padding: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 3 } as any, shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 },

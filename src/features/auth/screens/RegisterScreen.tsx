@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, KeyboardAvoidingView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, KeyboardAvoidingView, Dimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../app/providers/ThemeProvider';
 import { useAuthStore } from '../../../shared/hooks/useAuthStore';
@@ -8,6 +8,10 @@ import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
 import * as Location from 'expo-location';
+import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const WAVE_HEIGHT = 180;
 
 export function RegisterScreen({ navigation, route }: any) {
   const { t, i18n } = useTranslation();
@@ -77,6 +81,30 @@ export function RegisterScreen({ navigation, route }: any) {
       style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      {/* Wave Header */}
+      <View style={styles.waveContainer}>
+        <Svg width={SCREEN_WIDTH} height={WAVE_HEIGHT} viewBox={`0 0 ${SCREEN_WIDTH} ${WAVE_HEIGHT}`}>
+          <Defs>
+            <LinearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="1">
+              <Stop offset="0" stopColor="#16A34A" />
+              <Stop offset="1" stopColor="#15803D" />
+            </LinearGradient>
+          </Defs>
+          <Path
+            d={`M0,0 L${SCREEN_WIDTH},0 L${SCREEN_WIDTH},${WAVE_HEIGHT * 0.65} Q${SCREEN_WIDTH * 0.75},${WAVE_HEIGHT * 0.95} ${SCREEN_WIDTH * 0.5},${WAVE_HEIGHT * 0.78} Q${SCREEN_WIDTH * 0.25},${WAVE_HEIGHT * 0.6} 0,${WAVE_HEIGHT * 0.85} Z`}
+            fill="url(#waveGrad)"
+          />
+          <Path
+            d={`M0,0 L${SCREEN_WIDTH},0 L${SCREEN_WIDTH},${WAVE_HEIGHT * 0.55} Q${SCREEN_WIDTH * 0.65},${WAVE_HEIGHT * 0.82} ${SCREEN_WIDTH * 0.4},${WAVE_HEIGHT * 0.7} Q${SCREEN_WIDTH * 0.15},${WAVE_HEIGHT * 0.58} 0,${WAVE_HEIGHT * 0.75} Z`}
+            fill="#22C55E"
+            opacity={0.3}
+          />
+        </Svg>
+        <View style={styles.waveTitleWrap}>
+          <Text style={styles.waveTitle}>{t('register')}</Text>
+        </View>
+      </View>
+
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <Text style={[styles.stepLabel, { color: colors.mutedFg }]}>
           {t('step')} {step}/4 — {stepTitles[step - 1]}
@@ -213,7 +241,10 @@ export function RegisterScreen({ navigation, route }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  scroll: { flexGrow: 1, padding: 24, paddingTop: 48 },
+  waveContainer: { position: 'relative', width: '100%', height: WAVE_HEIGHT },
+  waveTitleWrap: { position: 'absolute', top: 52, left: 24 },
+  waveTitle: { color: '#FFFFFF', fontSize: 26, fontWeight: '800' },
+  scroll: { flexGrow: 1, padding: 24, paddingTop: 8 },
   stepLabel: { fontSize: 14, fontWeight: '500', marginBottom: 8 },
   progressBar: { height: 4, borderRadius: 2, overflow: 'hidden' },
   progressFill: { height: '100%', borderRadius: 2 },

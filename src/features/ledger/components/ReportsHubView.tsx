@@ -253,19 +253,48 @@ export function ReportsHubView() {
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
         ListHeaderComponent={
           <View style={{ paddingTop: 8 }}>
-            {/* Header */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <FileText color={colors.primary} size={18} />
-              <Text style={{ color: colors.foreground, fontSize: 16, fontWeight: '800' }}>
-                {t('reportsHubTitle')}
-              </Text>
-            </View>
-            <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
-              {t('reportsHubSubtitle')}
-            </Text>
+            {/* Summary Card */}
+            <Card style={{ borderRadius: 16 }} padding={16}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                <View style={[styles.summaryIcon, { backgroundColor: '#DBEAFE' }]}>
+                  <FileText color="#2563EB" size={20} />
+                </View>
+                <Text style={{ color: colors.foreground, fontSize: 15, fontWeight: '700' }}>
+                  {t('reportsHubTitle')}
+                </Text>
+              </View>
 
-            {/* Horizontal Report Tabs Selector */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 12 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 14 }}>
+                <View style={{ alignItems: 'center', flex: 1 }}>
+                  <Text style={{ color: colors.mutedFg, fontSize: 11 }}>{t('totalInflow')}</Text>
+                  <Text style={{ color: '#16A34A', fontSize: 16, fontWeight: '800' }}>{fmt(summary.totalIn)}</Text>
+                </View>
+                <View style={{ alignItems: 'center', flex: 1 }}>
+                  <Text style={{ color: colors.mutedFg, fontSize: 11 }}>{t('totalOutflow')}</Text>
+                  <Text style={{ color: '#DC2626', fontSize: 16, fontWeight: '800' }}>{fmt(summary.totalOut)}</Text>
+                </View>
+                <View style={{ alignItems: 'center', flex: 1 }}>
+                  <Text style={{ color: colors.mutedFg, fontSize: 11 }}>{t('netBalance')}</Text>
+                  <Text style={{ color: summary.net >= 0 ? '#16A34A' : '#DC2626', fontSize: 16, fontWeight: '800' }}>
+                    {summary.net < 0 ? '-' : ''}{fmt(Math.abs(summary.net))}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.actionRow}>
+                <TouchableOpacity onPress={handleCSVExport} style={[styles.exportBtn, { backgroundColor: '#DC2626' }]} activeOpacity={0.8}>
+                  <Download color="#FFFFFF" size={16} />
+                  <Text style={styles.exportBtnText}>{t('downloadCsv')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleWhatsAppShare} style={[styles.exportBtn, { backgroundColor: '#25D366' }]} activeOpacity={0.8}>
+                  <Share2 color="#FFFFFF" size={16} />
+                  <Text style={styles.exportBtnText}>{t('shareWhatsapp')}</Text>
+                </TouchableOpacity>
+              </View>
+            </Card>
+
+            {/* Report Type Selector */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 14, marginBottom: 10 }}>
               {REPORT_TABS.map((tab) => (
                 <TouchableOpacity
                   key={tab.key}
@@ -280,7 +309,7 @@ export function ReportsHubView() {
                 >
                   <Text
                     style={{
-                      color: selectedReport === tab.key ? colors.primary : colors.foreground,
+                      color: selectedReport === tab.key ? colors.primary : colors.mutedFg,
                       fontWeight: '700',
                       fontSize: 12,
                     }}
@@ -291,67 +320,17 @@ export function ReportsHubView() {
               ))}
             </ScrollView>
 
-            {/* Date Range Selectors */}
-            <Card style={{ marginBottom: 12 }} padding={12}>
-              <Text style={{ color: colors.mutedFg, fontSize: 13, fontWeight: '700', marginBottom: 8, textTransform: 'uppercase' }}>
-                {t('selectDateRange')}
-              </Text>
-              <View style={{ flexDirection: 'row', gap: 10 }}>
-                <View style={{ flex: 1 }}>
-                  <DatePickerInput
-                    label={t('fromLabel')}
-                    value={startDate}
-                    onChange={setStartDate}
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <DatePickerInput
-                    label={t('toLabel')}
-                    value={endDate}
-                    onChange={setEndDate}
-                  />
-                </View>
+            {/* Date Range — compact inline */}
+            <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
+              <View style={{ flex: 1 }}>
+                <DatePickerInput label={t('fromLabel')} value={startDate} onChange={setStartDate} />
               </View>
-            </Card>
-
-            {/* Summary KPIs */}
-            <View style={styles.kpiRow}>
-              <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
-                <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>{t('totalInflow')}</Text>
-                <Text style={[styles.kpiVal, { color: '#16A34A' }]}>{fmt(summary.totalIn)}</Text>
-              </View>
-
-              <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
-                <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>{t('totalOutflow')}</Text>
-                <Text style={[styles.kpiVal, { color: '#DC2626' }]}>{fmt(summary.totalOut)}</Text>
-              </View>
-
-              <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
-                <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>
-                  {t('netBalance')}
-                </Text>
-                <Text style={[styles.kpiVal, { color: summary.net >= 0 ? '#16A34A' : '#DC2626' }]}>
-                  {summary.net < 0 ? '-' : ''}{fmt(Math.abs(summary.net))}
-                </Text>
+              <View style={{ flex: 1 }}>
+                <DatePickerInput label={t('toLabel')} value={endDate} onChange={setEndDate} />
               </View>
             </View>
 
-            {/* Action Export Buttons */}
-            <View style={styles.actionRow}>
-              <Button
-                title={t('downloadCsv')}
-                onPress={handleCSVExport}
-                style={{ flex: 1 }}
-              />
-              <Button
-                title={t('shareWhatsapp')}
-                variant="outline"
-                onPress={handleWhatsAppShare}
-                style={{ flex: 1 }}
-              />
-            </View>
-
-            <Text style={{ color: colors.foreground, fontSize: 13, fontWeight: '700', marginTop: 14, marginBottom: 6 }}>
+            <Text style={{ color: colors.foreground, fontSize: 13, fontWeight: '700', marginBottom: 6 }}>
               {t('reportRecordsPreview')} ({filteredData.length})
             </Text>
           </View>
@@ -404,10 +383,9 @@ export function ReportsHubView() {
 }
 
 const styles = StyleSheet.create({
+  summaryIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   reportTab: { paddingHorizontal: 14, paddingVertical: 8, borderWidth: 1, borderRadius: 10, marginRight: 8 },
-  kpiRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
-  kpiCard: { flex: 1, borderRadius: 24, padding: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 },
-  kpiLabel: { fontSize: 13, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.3 },
-  kpiVal: { fontSize: 16, fontWeight: '800', marginTop: 6, letterSpacing: -0.5 },
-  actionRow: { flexDirection: 'row', gap: 10, marginBottom: 6 },
+  actionRow: { flexDirection: 'row', gap: 10 },
+  exportBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 10 },
+  exportBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '700' },
 });

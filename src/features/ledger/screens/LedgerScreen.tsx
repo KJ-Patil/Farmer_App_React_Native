@@ -17,7 +17,7 @@ import { PartyLedgerView } from '../components/PartyLedgerView';
 import { CreditTrackerView } from '../components/CreditTrackerView';
 import { TransactionFilterBar, TransactionFilters } from '../components/TransactionFilterBar';
 import { fmtDMY } from '../../../shared/utils/helpers';
-import { BookOpen, ScanLine, ArrowDownLeft, ArrowUpRight } from 'lucide-react-native';
+import { BookOpen, ScanLine, ArrowDownLeft, ArrowUpRight, List, Wallet, TrendingUp, FileText, Users, CreditCard } from 'lucide-react-native';
 
 type TabKey = 'all' | 'income' | 'pnl' | 'reports' | 'party' | 'credit';
 
@@ -60,30 +60,51 @@ export function LedgerScreen({ navigation }: any) {
     return result;
   }, [transactions, filters]);
 
-  const tabs: { key: TabKey; label: string }[] = [
-    { key: 'all', label: t('allTransactions') },
-    { key: 'income', label: t('incomeRegister') },
-    { key: 'pnl', label: t('profitLoss') },
-    { key: 'reports', label: t('reportsExport') },
-    { key: 'party', label: t('partyLedgers') },
-    { key: 'credit', label: t('creditDues') },
+  const tabDefs: { key: TabKey; label: string; Icon: typeof List }[] = [
+    { key: 'all', label: t('allTransactions'), Icon: List },
+    { key: 'income', label: t('incomeRegister'), Icon: Wallet },
+    { key: 'pnl', label: t('profitLoss'), Icon: TrendingUp },
+    { key: 'reports', label: t('reportsExport'), Icon: FileText },
+    { key: 'party', label: t('partyLedgers'), Icon: Users },
+    { key: 'credit', label: t('creditDues'), Icon: CreditCard },
   ];
 
   return (
     <ScreenLayout noPadding>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={[styles.tabBar, { borderBottomColor: colors.border, backgroundColor: colors.card }]} contentContainerStyle={styles.tabContent}>
-        {tabs.map((tab) => (
-          <TouchableOpacity
-            key={tab.key}
-            onPress={() => setActiveTab(tab.key)}
-            style={[styles.tab, { borderBottomColor: activeTab === tab.key ? colors.primary : 'transparent', borderBottomWidth: 2 }]}
-          >
-            <Text style={[styles.tabText, { color: activeTab === tab.key ? colors.primary : colors.mutedFg }]}>
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <View style={[styles.tabBarOuter, { backgroundColor: colors.background }]}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabContent}>
+          {tabDefs.map((tab) => {
+            const isActive = activeTab === tab.key;
+            return (
+              <TouchableOpacity
+                key={tab.key}
+                onPress={() => setActiveTab(tab.key)}
+                activeOpacity={0.7}
+                style={[
+                  styles.tabPill,
+                  {
+                    backgroundColor: isActive ? colors.primary : colors.card,
+                    borderColor: isActive ? colors.primary : colors.border,
+                  },
+                ]}
+              >
+                <tab.Icon size={15} color={isActive ? '#FFFFFF' : colors.mutedFg} />
+                <Text
+                  style={{
+                    fontSize: 12,
+                    fontWeight: '700',
+                    color: isActive ? '#FFFFFF' : colors.mutedFg,
+                    marginLeft: 5,
+                  }}
+                  numberOfLines={1}
+                >
+                  {tab.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
 
       <View style={styles.content}>
         {activeTab === 'all' && (
@@ -167,10 +188,9 @@ export function LedgerScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  tabBar: { maxHeight: 48, borderBottomWidth: 1 },
-  tabContent: { paddingHorizontal: 12, gap: 4 },
-  tab: { paddingHorizontal: 12, paddingVertical: 12 },
-  tabText: { fontSize: 13, fontWeight: '600' },
+  tabBarOuter: { paddingVertical: 10 },
+  tabContent: { paddingHorizontal: 14, gap: 8 },
+  tabPill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20, borderWidth: 1 },
   content: { flex: 1 },
   txnRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   actionGrid: { flexDirection: 'row', gap: 8, marginBottom: 12, marginTop: 8 },

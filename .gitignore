@@ -42,4 +42,32 @@ yarn-error.*
 
 *.apk
 
+# Build artifacts
+*.aab
+*.ipa
+build/
 
+# Environment files
+.env
+google-services.json
+GoogleService-Info.plist
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# Testing
+coverage/
+
+# Expo / EAS
+.expo-shared/
+.eas/
+
+# Misc
+*.log
+.cache/
+tmp/
