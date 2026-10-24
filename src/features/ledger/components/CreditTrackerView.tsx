@@ -17,7 +17,8 @@ import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
-import { isOverdue, fmtDMY } from '../../../shared/utils/helpers';
+import { isOverdue, tCategory, tPaymentMode } from '../../../shared/utils/helpers';
+import { useLocalizedFormat } from '../../../shared/hooks/useLocalizedFormat';
 import type { Transaction, PaymentMode } from '../../../shared/types/ledger';
 import {
   Clock,
@@ -39,6 +40,7 @@ export function CreditTrackerView({ onOpenAddModal }: CreditTrackerViewProps) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { transactions, recordCreditPayment } = useLedgerStore();
+  const { fmtCurrency, toNative, fmtDMY } = useLocalizedFormat();
 
   const [expandedTxId, setExpandedTxId] = useState<string | null>(null);
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
@@ -74,7 +76,7 @@ export function CreditTrackerView({ onOpenAddModal }: CreditTrackerViewProps) {
     if (numAmount > maxPending) {
       Alert.alert(
         t('invalid'),
-        `${t('amountCannotExceedDue')} (₹${maxPending})`
+        `${t('amountCannotExceedDue')} (${fmt(maxPending)})`
       );
       return;
     }
@@ -99,7 +101,7 @@ export function CreditTrackerView({ onOpenAddModal }: CreditTrackerViewProps) {
     }
   };
 
-  const fmt = (v: number) => `₹${Math.round(v).toLocaleString('en-IN')}`;
+  const fmt = (v: number) => fmtCurrency(Math.round(v));
 
   return (
     <View style={{ flex: 1 }}>
@@ -151,7 +153,7 @@ export function CreditTrackerView({ onOpenAddModal }: CreditTrackerViewProps) {
             </View>
 
             <Text style={{ color: colors.foreground, fontSize: 14, fontWeight: '700', marginTop: 12, marginBottom: 6 }}>
-              {t('creditBills')} ({creditPurchases.length})
+              {t('creditBills')} ({toNative(creditPurchases.length)})
             </Text>
           </View>
         }
@@ -183,13 +185,13 @@ export function CreditTrackerView({ onOpenAddModal }: CreditTrackerViewProps) {
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                     <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 15 }}>
-                      {tx.partyName || tx.category}
+                      {tx.partyName || tCategory(tx.category, t)}
                     </Text>
                     {tx.billNumber && <Badge text={`#${tx.billNumber}`} variant="default" />}
                   </View>
 
                   <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 4 }}>
-                    {tx.category} • {fmtDMY(tx.date)}
+                    {tCategory(tx.category, t)} • {fmtDMY(tx.date)}
                     {tx.plotName ? ` • ${tx.plotName}` : ''}
                   </Text>
 
@@ -246,7 +248,7 @@ export function CreditTrackerView({ onOpenAddModal }: CreditTrackerViewProps) {
                   style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
                 >
                   <Text style={{ color: colors.primary, fontSize: 13, fontWeight: '600' }}>
-                    {payments.length} {t('installments')}
+                    {toNative(payments.length)} {t('installments')}
                   </Text>
                   {isExpanded ? (
                     <ChevronUp color={colors.primary} size={14} />
@@ -301,7 +303,7 @@ export function CreditTrackerView({ onOpenAddModal }: CreditTrackerViewProps) {
                       >
                         <View>
                           <Text style={{ color: colors.foreground, fontSize: 13, fontWeight: '600' }}>
-                            {fmtDMY(p.date)} • {p.paymentMode?.toUpperCase()}
+                            {fmtDMY(p.date)} • {tPaymentMode(p.paymentMode, t)}
                           </Text>
                           {p.notes && (
                             <Text style={{ color: colors.mutedFg, fontSize: 13, fontStyle: 'italic' }}>
@@ -340,7 +342,7 @@ export function CreditTrackerView({ onOpenAddModal }: CreditTrackerViewProps) {
               </View>
 
               <Text style={{ color: colors.mutedFg, fontSize: 12, marginBottom: 12 }}>
-                {selectedTx.partyName || selectedTx.category} • {t('pending')}:{' '}
+                {selectedTx.partyName || tCategory(selectedTx.category, t)} • {t('pending')}:{' '}
                 <Text style={{ fontWeight: '700', color: colors.destructive }}>
                   {fmt(selectedTx.pendingAmount ?? selectedTx.amount)}
                 </Text>
@@ -383,7 +385,7 @@ export function CreditTrackerView({ onOpenAddModal }: CreditTrackerViewProps) {
                         fontSize: 12,
                       }}
                     >
-                      {mode.toUpperCase()}
+                      {t(mode)}
                     </Text>
                   </TouchableOpacity>
                 ))}

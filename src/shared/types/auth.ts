@@ -24,8 +24,8 @@ export interface UserProfile {
   state: string;
   pincode: string;
   geoLocation?: { lat: number; lng: number };
-  language: 'en' | 'mr';
-  membershipType: 'free' | 'gold';
+  language: 'en' | 'hi' | 'mr' | 'te' | 'ta' | 'kn' | 'bn' | 'gu' | 'ml' | 'pa' | 'od';
+  membershipType: 'free' | 'gold' | 'premium';
   profilePhoto?: string;
   alternateMobile?: string;
   dateOfBirth?: string;

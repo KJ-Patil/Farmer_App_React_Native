@@ -7,6 +7,7 @@ import { usePlotStore } from '../../../shared/hooks/usePlotStore';
 import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
+import { useLocalizedFormat } from '../../../shared/hooks/useLocalizedFormat';
 
 interface IssueToCropModalProps {
   visible: boolean;
@@ -19,7 +20,8 @@ export function IssueToCropModal({ visible, onClose, initialItemId }: IssueToCro
   const { colors } = useTheme();
   const { items, issueStockToCrop } = useInventoryStore();
   const { plots, crops } = usePlotStore();
-  const isMr = i18n.language === 'mr';
+  const isNonEnglish = i18n.language !== 'en';
+  const { fmtCurrency, toNative } = useLocalizedFormat();
 
   const [loading, setLoading] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState(initialItemId || '');
@@ -94,7 +96,7 @@ export function IssueToCropModal({ visible, onClose, initialItemId }: IssueToCro
                 style={[styles.chip, { borderColor: selectedItemId === item.id ? colors.primary : colors.border, backgroundColor: selectedItemId === item.id ? colors.primary + '15' : colors.card, borderRadius: 8 }]}
               >
                 <Text style={{ color: selectedItemId === item.id ? colors.primary : colors.foreground, fontWeight: '600', fontSize: 12 }}>
-                  {isMr && item.nameMr ? item.nameMr : item.name} ({item.currentStock})
+                  {isNonEnglish && item.nameMr ? item.nameMr : item.name} ({toNative(item.currentStock)})
                 </Text>
               </TouchableOpacity>
             ))}
@@ -102,11 +104,11 @@ export function IssueToCropModal({ visible, onClose, initialItemId }: IssueToCro
 
           {selectedItem && (
             <Text style={{ color: colors.mutedFg, fontSize: 12, marginBottom: 12 }}>
-              {t('available')}: {selectedItem.currentStock} {selectedItem.unit} @ ₹{selectedItem.purchaseRate}/{selectedItem.unit}
+              {t('available')}: {toNative(selectedItem.currentStock)} {t(selectedItem.unit)} @ {fmtCurrency(selectedItem.purchaseRate)}/{t(selectedItem.unit)}
             </Text>
           )}
 
-          <Input label={`${t('quantity')} (max: ${selectedItem?.currentStock || 0})`} value={quantity} onChangeText={(v) => setQuantity(v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" />
+          <Input label={`${t('quantity')} (max: ${toNative(selectedItem?.currentStock || 0)})`} value={quantity} onChangeText={(v) => setQuantity(v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" />
 
           <Text style={[styles.label, { color: colors.foreground }]}>{t('plots')}</Text>
           <View style={styles.chipGrid}>
@@ -131,7 +133,7 @@ export function IssueToCropModal({ visible, onClose, initialItemId }: IssueToCro
                     onPress={() => setSelectedCropId(c.id)}
                     style={[styles.chip, { borderColor: selectedCropId === c.id ? colors.primary : colors.border, backgroundColor: selectedCropId === c.id ? colors.primary + '15' : colors.card, borderRadius: 8 }]}
                   >
-                    <Text style={{ color: selectedCropId === c.id ? colors.primary : colors.foreground, fontWeight: '600', fontSize: 12 }}>{c.cropType}</Text>
+                    <Text style={{ color: selectedCropId === c.id ? colors.primary : colors.foreground, fontWeight: '600', fontSize: 12 }}>{t(c.cropType)}</Text>
                   </TouchableOpacity>
                 ))}
               </View>

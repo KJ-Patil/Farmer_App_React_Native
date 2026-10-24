@@ -9,7 +9,7 @@ import { Button } from '../../../components/ui/Button';
 import { Badge } from '../../../components/ui/Badge';
 import { AddCropModal } from '../../crops/components/AddCropModal';
 import { ArrowLeft, Sprout } from 'lucide-react-native';
-import { fmtDMY } from '../../../shared/utils/helpers';
+import { useLocalizedFormat } from '../../../shared/hooks/useLocalizedFormat';
 
 export function PlotDashboardScreen({ route, navigation }: any) {
   const { plotId } = route.params;
@@ -17,6 +17,7 @@ export function PlotDashboardScreen({ route, navigation }: any) {
   const { t, i18n } = useTranslation();
   const { colors } = useTheme();
   const { plots, crops, fetchCrops, getPlotRemainingArea } = usePlotStore();
+  const { fmtDMY, toNative } = useLocalizedFormat();
 
   const plot = plots.find((p) => p.id === plotId);
   const plotCrops = crops[plotId] || [];
@@ -47,7 +48,7 @@ export function PlotDashboardScreen({ route, navigation }: any) {
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <Text style={[styles.title, { color: colors.foreground }]}>{plot.name}</Text>
               <View style={[styles.gatBadge, { backgroundColor: colors.primary + '15', borderColor: colors.primary + '30' }]}>
-                <Text style={[styles.gatText, { color: colors.primary }]}>Gat #{plot.gatNumber}</Text>
+                <Text style={[styles.gatText, { color: colors.primary }]}>{t('gatNumber')} #{toNative(plot.gatNumber)}</Text>
               </View>
             </View>
             <Text style={[styles.subtitle, { color: colors.mutedFg }]}>
@@ -60,12 +61,12 @@ export function PlotDashboardScreen({ route, navigation }: any) {
         <Card style={{ marginTop: 14 }}>
           <View style={styles.detailRow}>
             <Text style={{ color: colors.mutedFg }}>{t('gatNumber')}</Text>
-            <Text style={{ color: colors.foreground, fontWeight: '700' }}>{plot.gatNumber}</Text>
+            <Text style={{ color: colors.foreground, fontWeight: '700' }}>{toNative(plot.gatNumber)}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={{ color: colors.mutedFg }}>{t('area')}</Text>
             <Text style={{ color: colors.foreground, fontWeight: '700' }}>
-              {plot.area} {t(plot.areaUnit || 'acre')}
+              {toNative(plot.area)} {t(plot.areaUnit || 'acre')}
             </Text>
           </View>
           <View style={styles.detailRow}>
@@ -104,10 +105,10 @@ export function PlotDashboardScreen({ route, navigation }: any) {
           </View>
           <View style={styles.areaStats}>
             <Text style={{ color: colors.mutedFg, fontSize: 12 }}>
-              {t('usedArea')}: <Text style={{ fontWeight: '700', color: colors.foreground }}>{usedArea.toFixed(2)}</Text>
+              {t('usedArea')}: <Text style={{ fontWeight: '700', color: colors.foreground }}>{toNative(usedArea.toFixed(2))}</Text>
             </Text>
             <Text style={{ color: colors.mutedFg, fontSize: 12 }}>
-              {t('remainingArea')}: <Text style={{ fontWeight: '700', color: colors.primary }}>{remaining.toFixed(2)}</Text>
+              {t('remainingArea')}: <Text style={{ fontWeight: '700', color: colors.primary }}>{toNative(remaining.toFixed(2))}</Text>
             </Text>
           </View>
         </Card>
@@ -116,7 +117,7 @@ export function PlotDashboardScreen({ route, navigation }: any) {
         <View style={styles.sectionHeader}>
           <View>
             <Text style={[styles.sectionTitle, { color: colors.foreground }]}>
-              {t('crops')} ({plotCrops.length})
+              {t('crops')} ({toNative(plotCrops.length)})
             </Text>
             <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
               {t('activeAndHarvestedCrops')}
@@ -154,10 +155,10 @@ export function PlotDashboardScreen({ route, navigation }: any) {
                 <View style={styles.cropRow}>
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.cropName, { color: colors.foreground }]}>
-                      {crop.cropType} {crop.variety ? `— ${crop.variety}` : ''}
+                      {t(crop.cropType)} {crop.variety ? `— ${crop.variety}` : ''}
                     </Text>
                     <Text style={{ color: colors.mutedFg, fontSize: 12, marginTop: 3 }}>
-                      {crop.area} {t(crop.areaUnit || 'acre')} • {t(crop.season.toLowerCase()) || crop.season} • {fmtDMY(crop.sowingDate)}
+                      {toNative(crop.area)} {t(crop.areaUnit || 'acre')} • {t(crop.season.toLowerCase()) || crop.season} • {fmtDMY(crop.sowingDate)}
                     </Text>
                   </View>
                   <Badge

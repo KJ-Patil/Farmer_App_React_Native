@@ -8,6 +8,7 @@ import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
+import { useLocalizedFormat } from '../../../shared/hooks/useLocalizedFormat';
 import type { IncomeCategory, PaymentMode } from '../../../shared/types/ledger';
 
 interface MoneyInModalProps {
@@ -28,6 +29,7 @@ export function MoneyInModal({ visible, onClose, plotId, cropId }: MoneyInModalP
   const { colors } = useTheme();
   const { postIncomeTransaction } = useLedgerStore();
   const { plots, crops } = usePlotStore();
+  const { fmtCurrency } = useLocalizedFormat();
 
   const [loading, setLoading] = useState(false);
   const [category, setCategory] = useState<IncomeCategory | ''>(cropId ? 'crop_sale' : '');
@@ -103,7 +105,7 @@ export function MoneyInModal({ visible, onClose, plotId, cropId }: MoneyInModalP
         await postIncomeTransaction({
           incomeCategory: 'crop_sale',
           ledgerType: 'agriculture',
-          category: 'Crop Sale',
+          category: 'cropSale',
           amount: netAmount,
           date,
           paymentMode,
@@ -140,7 +142,7 @@ export function MoneyInModal({ visible, onClose, plotId, cropId }: MoneyInModalP
         await postIncomeTransaction({
           incomeCategory: 'dairy',
           ledgerType: 'dairy',
-          category: 'Dairy Income',
+          category: 'dairyIncome',
           amount: dairyTotal,
           date, paymentMode, partyName, billNumber, notes,
           dairyDetails: {
@@ -157,7 +159,7 @@ export function MoneyInModal({ visible, onClose, plotId, cropId }: MoneyInModalP
         await postIncomeTransaction({
           incomeCategory: 'loan',
           ledgerType: 'personal',
-          category: 'Loan Received',
+          category: 'loanReceived',
           amount: loanNet,
           date, paymentMode: 'bank', partyName, billNumber, notes,
           loanDetails: {
@@ -268,7 +270,7 @@ export function MoneyInModal({ visible, onClose, plotId, cropId }: MoneyInModalP
                   <Input label={t('ratePerUnit')} value={ratePerUnit} onChangeText={(v) => setRatePerUnit(v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" />
 
                   <Card style={{ marginVertical: 10 }} padding={12}>
-                    <Text style={{ color: colors.foreground, fontWeight: '600' }}>{t('grossAmount')}: ₹{grossAmount.toLocaleString('en-IN')}</Text>
+                    <Text style={{ color: colors.foreground, fontWeight: '600' }}>{t('grossAmount')}: {fmtCurrency(grossAmount)}</Text>
                   </Card>
 
                   <Text style={[styles.sectionTitle, { color: colors.foreground }]}>{t('deductions')}</Text>
@@ -277,8 +279,8 @@ export function MoneyInModal({ visible, onClose, plotId, cropId }: MoneyInModalP
                   <Input label={t('otherDeduction')} value={otherDed} onChangeText={(v) => setOtherDed(v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" placeholder="0" />
 
                   <Card style={{ marginVertical: 10, borderLeftWidth: 4, borderLeftColor: colors.primary }} padding={12}>
-                    <Text style={{ color: colors.mutedFg, fontSize: 12 }}>{t('deductions')}: ₹{totalDeductions.toLocaleString('en-IN')}</Text>
-                    <Text style={{ color: colors.primary, fontWeight: '700', fontSize: 18 }}>{t('netAmount')}: ₹{netAmount.toLocaleString('en-IN')}</Text>
+                    <Text style={{ color: colors.mutedFg, fontSize: 12 }}>{t('deductions')}: {fmtCurrency(totalDeductions)}</Text>
+                    <Text style={{ color: colors.primary, fontWeight: '700', fontSize: 18 }}>{t('netAmount')}: {fmtCurrency(netAmount)}</Text>
                   </Card>
                 </>
               )}
@@ -293,7 +295,7 @@ export function MoneyInModal({ visible, onClose, plotId, cropId }: MoneyInModalP
                     <View style={{ flex: 1 }}><Input label={t('rate')} value={dairyRate} onChangeText={(v) => setDairyRate(v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" /></View>
                   </View>
                   <Card style={{ marginVertical: 10 }} padding={12}>
-                    <Text style={{ color: colors.primary, fontWeight: '700', fontSize: 18 }}>{t('amount')}: ₹{dairyTotal.toLocaleString('en-IN')}</Text>
+                    <Text style={{ color: colors.primary, fontWeight: '700', fontSize: 18 }}>{t('amount')}: {fmtCurrency(dairyTotal)}</Text>
                   </Card>
                 </>
               )}
@@ -311,7 +313,7 @@ export function MoneyInModal({ visible, onClose, plotId, cropId }: MoneyInModalP
                   <DatePickerInput label={t('firstInstallmentDate')} value={firstInstallment} onChange={setFirstInstallment} />
                   <DatePickerInput label={t('dueDate')} value={loanDueDate} onChange={setLoanDueDate} />
                   <Card style={{ marginVertical: 10, borderLeftWidth: 4, borderLeftColor: colors.warning }} padding={12}>
-                    <Text style={{ color: colors.warning, fontWeight: '700', fontSize: 18 }}>{t('netReceived')}: ₹{loanNet.toLocaleString('en-IN')}</Text>
+                    <Text style={{ color: colors.warning, fontWeight: '700', fontSize: 18 }}>{t('netReceived')}: {fmtCurrency(loanNet)}</Text>
                   </Card>
                 </>
               )}

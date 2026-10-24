@@ -9,6 +9,7 @@ import {
   Alert,
   Image,
   Modal,
+  StatusBar,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../app/providers/ThemeProvider';
@@ -19,15 +20,16 @@ import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { Sparkles, Edit3, X, Check, Globe, Moon, Sun, Crown, Star, Zap } from 'lucide-react-native';
-import { WaveHeader } from '../../../components/ui/WaveHeader';
+import { LinearGradient } from 'expo-linear-gradient';
+import { SUPPORTED_LANGUAGES } from '../../../shared/locales/i18n';
+import { useLocalizedFormat } from '../../../shared/hooks/useLocalizedFormat';
 
 export function SettingsScreen() {
   const { t, i18n } = useTranslation();
   const { colors } = useTheme();
   const { user, signOut, updateProfile, isLoading } = useAuthStore();
   const { theme, setTheme } = useThemeStore();
-  const isMr = i18n.language === 'mr';
-
+  const { fmtCurrency, toNative, fmtDMY } = useLocalizedFormat();
   // Profile Edit modal state
   const [editOpen, setEditOpen] = useState(false);
   const [fullName, setFullName] = useState(user?.fullName || '');
@@ -68,76 +70,72 @@ export function SettingsScreen() {
   };
 
   const userInitial = user?.fullName?.charAt(0)?.toUpperCase() || 'F';
-  const dobValue = user?.dateOfBirth || (user as any)?.dob || '—';
+  const rawDob = user?.dateOfBirth || (user as any)?.dob || '';
+  const dobValue = rawDob ? toNative(rawDob) : '—';
 
   return (
     <ScreenLayout noPadding noTopInset>
-      <WaveHeader
-        title={t('settings')}
-        subtitle={user?.fullName || ''}
-        gradientFrom="#64748B"
-        gradientTo="#334155"
-      />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60, paddingHorizontal: 16 }}>
-        <View style={styles.topHeader}>
-          <View />
-          <Button
-            title={t('edit')}
-            onPress={() => {
-              setFullName(user?.fullName || '');
-              setVillage(user?.village || '');
-              setTaluka(user?.taluka || '');
-              setDistrict(user?.district || '');
-              setState(user?.state || '');
-              setPincode(user?.pincode || '');
-              setAlternateMobile(user?.alternateMobile || '');
-              setEditOpen(true);
-            }}
-            variant="outline"
-            size="sm"
-          />
-        </View>
+      {/* Profile Gradient Header */}
+      <LinearGradient
+        colors={['#64748B', '#334155']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.profileHeader}
+      >
+        <View style={[styles.profileHeaderContent, { paddingTop: (StatusBar.currentHeight || 44) + 16 }]}>
+          <View style={styles.profileTopRow}>
+            <Text style={styles.headerTitle}>{t('settings')}</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setFullName(user?.fullName || '');
+                setVillage(user?.village || '');
+                setTaluka(user?.taluka || '');
+                setDistrict(user?.district || '');
+                setState(user?.state || '');
+                setPincode(user?.pincode || '');
+                setAlternateMobile(user?.alternateMobile || '');
+                setEditOpen(true);
+              }}
+              activeOpacity={0.7}
+              style={styles.editBtn}
+            >
+              <Edit3 color="#FFFFFF" size={14} />
+              <Text style={styles.editBtnText}>{t('edit')}</Text>
+            </TouchableOpacity>
+          </View>
 
-        {/* Profile Header Card */}
-        <Card style={{ marginTop: 12 }} padding={16}>
           <View style={styles.profileRow}>
             {user?.profilePhoto ? (
               <Image source={{ uri: user.profilePhoto }} style={styles.avatarImg} />
             ) : (
-              <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
+              <View style={styles.avatar}>
                 <Text style={styles.avatarText}>{userInitial}</Text>
               </View>
             )}
             <View style={{ flex: 1, marginLeft: 14 }}>
-              <Text style={[styles.name, { color: colors.foreground }]}>
+              <Text style={styles.profileName}>
                 {user?.fullName || t('farmer')}
               </Text>
-              <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 1 }}>
-                +91 {user?.mobileNumber}
+              <Text style={styles.profileInfo}>
+                +{toNative('91')} {toNative(user?.mobileNumber || '')}
               </Text>
               {user?.emailId ? (
-                <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 1 }}>
+                <Text style={styles.profileInfo}>
                   {user.emailId}
                 </Text>
               ) : null}
-
-              <View
-                style={[
-                  styles.membershipBadge,
-                  {
-                    backgroundColor: user?.membershipType === 'premium' ? '#EDE9FE' : user?.membershipType === 'gold' ? '#FEF3C7' : colors.primary + '15',
-                    borderColor: user?.membershipType === 'premium' ? '#7C3AED30' : user?.membershipType === 'gold' ? '#D9770630' : colors.primary + '30',
-                  },
-                ]}
-              >
-                <Sparkles color={user?.membershipType === 'premium' ? '#7C3AED' : user?.membershipType === 'gold' ? '#D97706' : colors.primary} size={12} />
-                <Text style={[styles.membershipText, { color: user?.membershipType === 'premium' ? '#7C3AED' : user?.membershipType === 'gold' ? '#D97706' : colors.primary }]}>
-                  {user?.membershipType === 'premium' ? (t('premiumTier') || 'Premium') : user?.membershipType === 'gold' ? (t('goldTier') || 'Gold') : (t('freeAccount') || 'Free')}
+              <View style={styles.membershipBadge}>
+                <Sparkles color="#FDE047" size={12} />
+                <Text style={styles.membershipText}>
+                  {user?.membershipType === 'gold' ? t('gold') : user?.membershipType === 'premium' ? t('premium') : t('free')}
                 </Text>
               </View>
             </View>
           </View>
-        </Card>
+        </View>
+      </LinearGradient>
+
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60, paddingHorizontal: 16 }}>
 
         {/* Personal Details Card */}
         <Card style={{ marginTop: 12 }}>
@@ -146,10 +144,10 @@ export function SettingsScreen() {
           </Text>
           {[
             { label: t('fullName'), value: user?.fullName },
-            { label: t('alternateMobile'), value: user?.alternateMobile || '—' },
+            { label: t('alternateMobile'), value: user?.alternateMobile ? toNative(user.alternateMobile) : '—' },
             { label: t('dateOfBirth'), value: dobValue },
-            { label: t('aadhaarNumber') || 'Aadhaar Number', value: user?.aadhaarNumber || '—' },
-            { label: t('farmerId') || 'Farmer ID', value: user?.farmerId || '—' },
+            { label: t('aadhaarNumber'), value: user?.aadhaarNumber ? toNative(user.aadhaarNumber) : '—' },
+            { label: t('farmerId'), value: user?.farmerId ? toNative(user.farmerId) : '—' },
           ].map((item, i) => (
             <View key={i} style={styles.detailRow}>
               <Text style={{ color: colors.mutedFg, flex: 1 }}>{item.label}</Text>
@@ -168,7 +166,7 @@ export function SettingsScreen() {
             { label: t('taluka'), value: user?.taluka },
             { label: t('district'), value: user?.district },
             { label: t('state'), value: user?.state },
-            { label: t('pincode'), value: user?.pincode },
+            { label: t('pincode'), value: user?.pincode ? toNative(user.pincode) : undefined },
           ].map((item, i) => (
             <View key={i} style={styles.detailRow}>
               <Text style={{ color: colors.mutedFg, flex: 1 }}>{item.label}</Text>
@@ -179,8 +177,8 @@ export function SettingsScreen() {
           ))}
           {user?.geoLocation && (
             <Text style={{ color: colors.primary, fontSize: 13, marginTop: 6 }}>
-              📍 GPS: {(user.geoLocation as any).latitude || user.geoLocation.lat},{' '}
-              {(user.geoLocation as any).longitude || user.geoLocation.lng}
+              📍 GPS: {toNative((user.geoLocation as any).latitude || user.geoLocation.lat)},{' '}
+              {toNative((user.geoLocation as any).longitude || user.geoLocation.lng)}
             </Text>
           )}
         </Card>
@@ -188,28 +186,28 @@ export function SettingsScreen() {
         {/* Language Selection */}
         <Card style={{ marginTop: 12 }}>
           <Text style={[styles.sectionTitle, { color: colors.foreground }]}>{t('language')}</Text>
-          <View style={styles.optionRow}>
-            {(['en', 'mr'] as const).map((lang) => (
+          <View style={styles.languageGrid}>
+            {SUPPORTED_LANGUAGES.map((lang) => (
               <TouchableOpacity
-                key={lang}
-                onPress={() => i18n.changeLanguage(lang)}
+                key={lang.code}
+                onPress={() => i18n.changeLanguage(lang.code)}
                 style={[
-                  styles.optionBtn,
+                  styles.langBtn,
                   {
-                    borderColor: i18n.language === lang ? colors.primary : colors.border,
-                    backgroundColor: i18n.language === lang ? colors.primary + '15' : colors.card,
+                    borderColor: i18n.language === lang.code ? colors.primary : colors.border,
+                    backgroundColor: i18n.language === lang.code ? colors.primary + '15' : colors.card,
                     borderRadius: colors.radius,
                   },
                 ]}
               >
                 <Text
                   style={{
-                    color: i18n.language === lang ? colors.primary : colors.foreground,
+                    color: i18n.language === lang.code ? colors.primary : colors.foreground,
                     fontWeight: '700',
                     fontSize: 14,
                   }}
                 >
-                  {lang === 'en' ? 'English' : 'मराठी'}
+                  {lang.nativeLabel}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -277,7 +275,7 @@ export function SettingsScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ color: colors.foreground, fontSize: 15, fontWeight: '700' }}>
-                Free
+                {t('free')}
               </Text>
               <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
                 {t('freeFeatures') || 'Basic features, limited reports'}
@@ -301,7 +299,7 @@ export function SettingsScreen() {
             onPress={() => {
               Alert.alert(
                 t('upgradePlan') || 'Upgrade Plan',
-                (t('confirmUpgrade') || 'Upgrade to Gold for') + ' ₹50/' + (t('month') || 'month') + '?',
+                (t('confirmUpgrade') || 'Upgrade to Gold for') + ` ${fmtCurrency(50)}/` + (t('month') || 'month') + '?',
                 [
                   { text: t('cancel'), style: 'cancel' },
                   { text: t('upgrade') || 'Upgrade', onPress: () => {
@@ -325,14 +323,14 @@ export function SettingsScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ color: colors.foreground, fontSize: 15, fontWeight: '700' }}>
-                Gold
+                {t('gold')}
               </Text>
               <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
                 {t('goldFeatures') || 'Full reports, WhatsApp share, party ledger'}
               </Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              <Text style={{ color: '#D97706', fontSize: 16, fontWeight: '800' }}>₹50</Text>
+              <Text style={{ color: '#D97706', fontSize: 16, fontWeight: '800' }}>{fmtCurrency(50)}</Text>
               <Text style={{ color: colors.mutedFg, fontSize: 12 }}>/{t('month') || 'month'}</Text>
               {user?.membershipType === 'gold' && (
                 <View style={[styles.activeBadge, { backgroundColor: '#D97706' }]}>
@@ -348,7 +346,7 @@ export function SettingsScreen() {
             onPress={() => {
               Alert.alert(
                 t('upgradePlan') || 'Upgrade Plan',
-                (t('confirmUpgrade') || 'Upgrade to Premium for') + ' ₹90/' + (t('month') || 'month') + '?',
+                (t('confirmUpgrade') || 'Upgrade to Premium for') + ` ${fmtCurrency(90)}/` + (t('month') || 'month') + '?',
                 [
                   { text: t('cancel'), style: 'cancel' },
                   { text: t('upgrade') || 'Upgrade', onPress: () => {
@@ -372,14 +370,14 @@ export function SettingsScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ color: colors.foreground, fontSize: 15, fontWeight: '700' }}>
-                Premium
+                {t('premium')}
               </Text>
               <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
                 {t('premiumFeatures') || 'AI insights, priority support, all features'}
               </Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              <Text style={{ color: '#7C3AED', fontSize: 16, fontWeight: '800' }}>₹90</Text>
+              <Text style={{ color: '#7C3AED', fontSize: 16, fontWeight: '800' }}>{fmtCurrency(90)}</Text>
               <Text style={{ color: colors.mutedFg, fontSize: 12 }}>/{t('month') || 'month'}</Text>
               {user?.membershipType === 'premium' && (
                 <View style={[styles.activeBadge, { backgroundColor: '#7C3AED' }]}>
@@ -446,19 +444,26 @@ export function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  topHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 },
-  title: { fontSize: 24, fontWeight: '700', letterSpacing: -0.5 },
+  profileHeader: { width: '100%', borderBottomLeftRadius: 24, borderBottomRightRadius: 24, overflow: 'hidden' },
+  profileHeaderContent: { paddingHorizontal: 20, paddingBottom: 20 },
+  profileTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  headerTitle: { fontSize: 20, fontWeight: '700', color: '#FFFFFF', letterSpacing: -0.3 },
+  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
+  editBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '600' },
   profileRow: { flexDirection: 'row', alignItems: 'center' },
-  avatarImg: { width: 56, height: 56, borderRadius: 28, borderWidth: 1, borderColor: '#CBD5E1' },
-  avatar: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center' },
+  avatarImg: { width: 56, height: 56, borderRadius: 28, borderWidth: 2, borderColor: 'rgba(255,255,255,0.4)' },
+  avatar: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.2)', borderWidth: 2, borderColor: 'rgba(255,255,255,0.3)' },
   avatarText: { color: '#FFF', fontSize: 22, fontWeight: '700' },
-  name: { fontSize: 17, fontWeight: '700' },
-  membershipBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12, borderWidth: 1, marginTop: 6 },
-  membershipText: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase' },
+  profileName: { fontSize: 17, fontWeight: '700', color: '#FFFFFF' },
+  profileInfo: { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 2 },
+  membershipBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.18)', marginTop: 6 },
+  membershipText: { fontSize: 12, fontWeight: '700', textTransform: 'uppercase', color: '#FDE047' },
   sectionTitle: { fontSize: 15, fontWeight: '700', marginBottom: 10 },
   detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'rgba(0,0,0,0.06)' },
   optionRow: { flexDirection: 'row', gap: 10 },
   optionBtn: { flex: 1, paddingVertical: 12, alignItems: 'center', borderWidth: 1 },
+  languageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  langBtn: { width: '30%', flexGrow: 1, paddingVertical: 12, alignItems: 'center', borderWidth: 1 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
   modalCard: { width: '100%', maxWidth: 440, alignSelf: 'center' },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },

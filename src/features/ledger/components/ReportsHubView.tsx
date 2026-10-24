@@ -20,7 +20,8 @@ import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Badge } from '../../../components/ui/Badge';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
-import { CSV_BOM, fmtDMY } from '../../../shared/utils/helpers';
+import { CSV_BOM, tCategory, tPaymentMode } from '../../../shared/utils/helpers';
+import { useLocalizedFormat } from '../../../shared/hooks/useLocalizedFormat';
 import type { Transaction } from '../../../shared/types/ledger';
 import {
   FileText,
@@ -77,6 +78,7 @@ export function ReportsHubView() {
   const { colors } = useTheme();
   const { transactions } = useLedgerStore();
   const { items: inventoryItems, consumptions: inventoryConsumptions } = useInventoryStore();
+  const { fmtCurrency, toNative, fmtDMY } = useLocalizedFormat();
 
   const [selectedReport, setSelectedReport] = useState<ReportKey>('ledger');
 
@@ -151,12 +153,12 @@ export function ReportsHubView() {
       const rows = inventoryItems.map((item) =>
         [
           item.name,
-          item.category || item.type,
+          tCategory(item.category || item.type, t),
           item.currentStock,
           item.unit,
           item.purchaseRate,
           item.currentStock * item.purchaseRate,
-          item.currentStock <= (item.minStockThreshold || 5) ? 'LOW STOCK' : 'AVAILABLE',
+          item.currentStock <= (item.minStockThreshold || 5) ? t('lowStock') : t('available'),
         ]
           .map((v) => `"${String(v).replace(/"/g, '""')}"`)
           .join(',')
@@ -168,10 +170,10 @@ export function ReportsHubView() {
     const rows = filteredData.map((tx) =>
       [
         tx.date,
-        tx.type === 'income' ? 'INCOME' : 'EXPENSE',
-        tx.category,
+        tx.type === 'income' ? t('income') : t('expenses'),
+        tCategory(tx.category, t),
         tx.amount,
-        tx.paymentMode?.toUpperCase() || 'CASH',
+        tPaymentMode(tx.paymentMode, t),
         tx.partyName || '',
         tx.plotName || '',
         tx.cropName || '',
@@ -228,22 +230,22 @@ export function ReportsHubView() {
 
     let text = `📊 *${title}*\n`;
     text += `📅 ${startDate} - ${endDate}\n`;
-    text += `🟢 ${t('totalInflow')}: ₹${Math.round(summary.totalIn).toLocaleString('en-IN')}\n`;
-    text += `🔴 ${t('totalOutflow')}: ₹${Math.round(summary.totalOut).toLocaleString('en-IN')}\n`;
-    text += `⚖️ ${t('netBalance')}: ₹${Math.round(summary.net).toLocaleString('en-IN')}\n\n`;
+    text += `🟢 ${t('totalInflow')}: ${fmt(summary.totalIn)}\n`;
+    text += `🔴 ${t('totalOutflow')}: ${fmt(summary.totalOut)}\n`;
+    text += `⚖️ ${t('netBalance')}: ${fmt(summary.net)}\n\n`;
 
     filteredData.slice(0, 10).forEach((tx) => {
-      text += `• ${fmtDMY(tx.date)}: ${tx.category} ${tx.type === 'income' ? '+₹' : '-₹'}${tx.amount} (${tx.paymentMode})\n`;
+      text += `• ${fmtDMY(tx.date)}: ${tCategory(tx.category, t)} ${tx.type === 'income' ? '+' : '-'}${fmtCurrency(tx.amount)} (${tPaymentMode(tx.paymentMode, t)})\n`;
     });
 
     if (filteredData.length > 10) {
-      text += `...+${filteredData.length - 10}\n`;
+      text += `...+${toNative(filteredData.length - 10)}\n`;
     }
 
     Share.share({ message: text });
   };
 
-  const fmt = (v: number) => `₹${Math.round(v).toLocaleString('en-IN')}`;
+  const fmt = (v: number) => fmtCurrency(Math.round(v));
 
   return (
     <View style={{ flex: 1 }}>
@@ -331,7 +333,7 @@ export function ReportsHubView() {
             </View>
 
             <Text style={{ color: colors.foreground, fontSize: 13, fontWeight: '700', marginBottom: 6 }}>
-              {t('reportRecordsPreview')} ({filteredData.length})
+              {t('reportRecordsPreview')} ({toNative(filteredData.length)})
             </Text>
           </View>
         }
@@ -349,10 +351,10 @@ export function ReportsHubView() {
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                   <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 13 }}>
-                    {tx.category}
+                    {tCategory(tx.category, t)}
                   </Text>
                   <Badge
-                    text={tx.paymentMode?.toUpperCase() || 'CASH'}
+                    text={tPaymentMode(tx.paymentMode, t)}
                     variant={tx.type === 'income' ? 'success' : 'default'}
                   />
                   {tx.billNumber && <Badge text={`#${tx.billNumber}`} variant="default" />}
@@ -360,7 +362,7 @@ export function ReportsHubView() {
                 <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
                   {fmtDMY(tx.date)}
                   {tx.partyName ? ` • ${tx.partyName}` : ''}
-                  {tx.cropName ? ` • ${tx.cropName}` : ''}
+                  {tx.cropName ? ` • ${t(tx.cropName)}` : ''}
                 </Text>
               </View>
 

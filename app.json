@@ -46,7 +46,8 @@
           "photosPermission": "Allow FarmerLedger to access your photos for bill scanning.",
           "cameraPermission": "Allow FarmerLedger to use the camera for bill scanning."
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "extra": {
       "eas": {

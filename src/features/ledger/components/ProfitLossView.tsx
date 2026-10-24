@@ -12,6 +12,7 @@ import { useLedgerStore } from '../../../shared/hooks/useLedgerStore';
 import { usePlotStore } from '../../../shared/hooks/usePlotStore';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
+import { useLocalizedFormat } from '../../../shared/hooks/useLocalizedFormat';
 import {
   TrendingUp,
   TrendingDown,
@@ -49,6 +50,7 @@ export function ProfitLossView() {
   const { colors } = useTheme();
   const { transactions } = useLedgerStore();
   const { plots, crops } = usePlotStore();
+  const { fmtCurrency, toNative } = useLocalizedFormat();
 
   const [period, setPeriod] = useState<PeriodTab>('monthly');
   const [selectedPlotId, setSelectedPlotId] = useState<string>('all');
@@ -71,7 +73,7 @@ export function ProfitLossView() {
     { key: 'monthly', label: t('monthlyPeriod') },
     { key: 'daily', label: t('daily') },
     { key: 'yearly', label: t('yearlyPeriod') },
-    { key: 'fy', label: `${t('financialYear')} (${fyStartYear}-${String(fyEndYear).slice(-2)})` },
+    { key: 'fy', label: `${t('financialYear')} (${toNative(fyStartYear)}-${toNative(String(fyEndYear).slice(-2))})` },
     { key: 'plotWise', label: t('plotWise') },
     { key: 'cropWise', label: t('cropWise') },
     { key: 'dairy', label: t('dairy') },
@@ -84,7 +86,7 @@ export function ProfitLossView() {
     Object.values(crops).forEach((plotCrops) => {
       plotCrops.forEach((c) => {
         if (!list.find((item) => item.id === c.id)) {
-          list.push({ id: c.id, name: `${c.cropType} (${c.variety || ''})` });
+          list.push({ id: c.id, name: `${t(c.cropType)} (${c.variety || ''})` });
         }
       });
     });
@@ -204,7 +206,7 @@ export function ProfitLossView() {
     };
   }, [filteredTxns]);
 
-  const fmt = (v: number) => `₹${Math.round(v).toLocaleString('en-IN')}`;
+  const fmt = (v: number) => fmtCurrency(Math.round(v));
 
   return (
     <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
@@ -265,7 +267,7 @@ export function ProfitLossView() {
               ]}
             >
               <Text style={{ color: selectedPlotId === pl.id ? '#FFF' : colors.foreground, fontSize: 13, fontWeight: '700' }}>
-                {pl.name} (Gat #{pl.gatNumber})
+                {pl.name} (Gat #{toNative(pl.gatNumber)})
               </Text>
             </TouchableOpacity>
           ))}
@@ -328,7 +330,7 @@ export function ProfitLossView() {
             {t('netFarmProfit')}
           </Text>
           <Badge
-            text={`${pnl.netMargin >= 0 ? '+' : ''}${pnl.netMargin.toFixed(1)}% ${t('margin')}`}
+            text={`${pnl.netMargin >= 0 ? '+' : ''}${toNative(pnl.netMargin.toFixed(1))}% ${t('margin')}`}
             variant={pnl.netProfit >= 0 ? 'success' : 'destructive'}
           />
         </View>
@@ -454,7 +456,7 @@ export function ProfitLossView() {
               {fmt(pnl.grossProfit)}
             </Text>
             <Text style={{ color: '#2563EB', fontSize: 13, fontWeight: '700' }}>
-              {pnl.grossMargin.toFixed(1)}% {t('margin')}
+              {toNative(pnl.grossMargin.toFixed(1))}% {t('margin')}
             </Text>
           </View>
         </View>

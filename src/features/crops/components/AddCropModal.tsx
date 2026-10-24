@@ -7,6 +7,7 @@ import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
 import { Plus } from 'lucide-react-native';
+import { useLocalizedFormat } from '../../../shared/hooks/useLocalizedFormat';
 
 interface AddCropModalProps {
   visible: boolean;
@@ -24,6 +25,7 @@ export function AddCropModal({ visible, onClose, plotId }: AddCropModalProps) {
   const { createCrop, getPlotRemainingArea } = usePlotStore();
 
   const remaining = getPlotRemainingArea(plotId);
+  const { toNative } = useLocalizedFormat();
   const [loading, setLoading] = useState(false);
   const [cropDropdownOpen, setCropDropdownOpen] = useState(false);
   const [addingCustomCrop, setAddingCustomCrop] = useState(false);
@@ -83,7 +85,7 @@ export function AddCropModal({ visible, onClose, plotId }: AddCropModalProps) {
 
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <Text style={{ color: colors.mutedFg, fontSize: 13, marginBottom: 16 }}>
-            {t('remainingArea')}: {remaining.toFixed(2)}
+            {t('remainingArea')}: {toNative(remaining.toFixed(2))}
           </Text>
 
           <Text style={[styles.label, { color: colors.foreground }]}>{t('cropType')}</Text>

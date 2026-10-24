@@ -8,6 +8,7 @@ import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
 import * as Location from 'expo-location';
+import { SUPPORTED_LANGUAGES } from '../../../shared/locales/i18n';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -33,7 +34,7 @@ export function RegisterScreen({ navigation, route }: any) {
     dateOfBirth: '',
     farmerId: '',
     geoLocation: undefined as { lat: number; lng: number } | undefined,
-    language: i18n.language as 'en' | 'mr',
+    language: i18n.language as 'en' | 'hi' | 'mr' | 'te' | 'ta' | 'kn' | 'bn' | 'gu' | 'ml' | 'pa' | 'od',
     membershipType: 'free' as 'free' | 'gold',
   });
 
@@ -166,22 +167,22 @@ export function RegisterScreen({ navigation, route }: any) {
           {step === 4 && (
             <>
               <Text style={[styles.sectionTitle, { color: colors.foreground }]}>{t('language')}</Text>
-              <View style={styles.optionRow}>
-                {(['en', 'mr'] as const).map((lang) => (
+              <View style={styles.languageGrid}>
+                {SUPPORTED_LANGUAGES.map((lang) => (
                   <TouchableOpacity
-                    key={lang}
-                    onPress={() => { updateForm('language', lang); i18n.changeLanguage(lang); }}
+                    key={lang.code}
+                    onPress={() => { updateForm('language', lang.code); i18n.changeLanguage(lang.code); }}
                     style={[
-                      styles.optionBtn,
+                      styles.langBtn,
                       {
-                        borderColor: form.language === lang ? colors.primary : colors.border,
-                        backgroundColor: form.language === lang ? colors.primary + '15' : colors.card,
+                        borderColor: form.language === lang.code ? colors.primary : colors.border,
+                        backgroundColor: form.language === lang.code ? colors.primary + '15' : colors.card,
                         borderRadius: colors.radius,
                       },
                     ]}
                   >
-                    <Text style={{ color: form.language === lang ? colors.primary : colors.foreground, fontWeight: '600' }}>
-                      {lang === 'en' ? 'English' : 'मराठी'}
+                    <Text style={{ color: form.language === lang.code ? colors.primary : colors.foreground, fontWeight: '600' }}>
+                      {lang.nativeLabel}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -251,6 +252,8 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 16, fontWeight: '600', marginBottom: 12 },
   optionRow: { flexDirection: 'row', gap: 12 },
   optionBtn: { flex: 1, borderWidth: 1.5, padding: 16, alignItems: 'center' },
+  languageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  langBtn: { width: '30%', flexGrow: 1, borderWidth: 1.5, paddingVertical: 12, alignItems: 'center' },
   btnRow: { flexDirection: 'row', marginTop: 20 },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
 });

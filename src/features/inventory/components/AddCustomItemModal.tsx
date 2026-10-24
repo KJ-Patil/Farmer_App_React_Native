@@ -92,7 +92,7 @@ export function AddCustomItemModal({ visible, onClose }: AddCustomItemModalProps
                 onPress={() => setUnit(u)}
                 style={[styles.chip, { borderColor: unit === u ? colors.primary : colors.border, backgroundColor: unit === u ? colors.primary + '15' : colors.card, borderRadius: 8 }]}
               >
-                <Text style={{ color: unit === u ? colors.primary : colors.foreground, fontWeight: '600', fontSize: 12 }}>{u}</Text>
+                <Text style={{ color: unit === u ? colors.primary : colors.foreground, fontWeight: '600', fontSize: 12 }}>{t(u)}</Text>
               </TouchableOpacity>
             ))}
           </View>

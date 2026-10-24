@@ -2,6 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop, Line, Text as SvgText } from 'react-native-svg';
 import { useTheme } from '../../app/providers/ThemeProvider';
+import { useLocalizedFormat } from '../../shared/hooks/useLocalizedFormat';
 
 interface DataPoint {
   label: string;
@@ -17,6 +18,7 @@ interface AreaChartProps {
 
 export function AreaChart({ data, width = 320, height = 160 }: AreaChartProps) {
   const { colors } = useTheme();
+  const { toNative } = useLocalizedFormat();
 
   if (data.length < 2) return null;
 
@@ -66,7 +68,7 @@ export function AreaChart({ data, width = 320, height = 160 }: AreaChartProps) {
         {Array.from({ length: gridLines + 1 }).map((_, i) => {
           const y = toY(i * gridStep);
           const val = Math.round(i * gridStep);
-          const label = val >= 1000 ? `${(val / 1000).toFixed(0)}k` : `${val}`;
+          const label = val >= 1000 ? `${toNative((val / 1000).toFixed(0))}k` : toNative(val);
           return (
             <React.Fragment key={i}>
               <Line x1={paddingLeft} y1={y} x2={width - 10} y2={y} stroke={colors.border} strokeWidth={0.5} />
@@ -92,7 +94,7 @@ export function AreaChart({ data, width = 320, height = 160 }: AreaChartProps) {
             fill={colors.mutedFg}
             fontSize={9}
           >
-            {d.label}
+            {toNative(d.label)}
           </SvgText>
         ))}
       </Svg>

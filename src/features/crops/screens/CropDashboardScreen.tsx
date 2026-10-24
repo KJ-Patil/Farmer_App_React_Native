@@ -13,7 +13,7 @@ import { DatePickerInput } from '../../../components/ui/DatePickerInput';
 import { MoneyInModal } from '../../ledger/components/MoneyInModal';
 import { MoneyOutModal } from '../../ledger/components/MoneyOutModal';
 import { ArrowLeft, Sprout, TrendingUp, TrendingDown, DollarSign } from 'lucide-react-native';
-import { fmtDMY } from '../../../shared/utils/helpers';
+import { useLocalizedFormat } from '../../../shared/hooks/useLocalizedFormat';
 
 const STATUS_ORDER = ['sown', 'vegetative', 'flowering', 'harvested'] as const;
 
@@ -23,6 +23,7 @@ export function CropDashboardScreen({ route, navigation }: any) {
   const { colors } = useTheme();
   const { crops, updateCrop } = usePlotStore();
   const { transactions } = useLedgerStore();
+  const { fmtCurrency, fmtDMY, toNative } = useLocalizedFormat();
 
   const [moneyInOpen, setMoneyInOpen] = useState(false);
   const [moneyOutOpen, setMoneyOutOpen] = useState(false);
@@ -119,9 +120,9 @@ export function CropDashboardScreen({ route, navigation }: any) {
             <ArrowLeft color={colors.foreground} size={18} />
           </TouchableOpacity>
           <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={[styles.title, { color: colors.foreground }]}>{crop.cropType}</Text>
+            <Text style={[styles.title, { color: colors.foreground }]}>{t(crop.cropType)}</Text>
             <Text style={{ color: colors.mutedFg, fontSize: 12 }}>
-              {crop.variety} • {crop.area} {crop.areaUnit ? t(crop.areaUnit) : t('acre')}
+              {crop.variety} • {toNative(crop.area)} {crop.areaUnit ? t(crop.areaUnit) : t('acre')}
             </Text>
           </View>
           <Badge
@@ -151,13 +152,13 @@ export function CropDashboardScreen({ route, navigation }: any) {
             <View style={[styles.finItem, styles.finCard, { backgroundColor: colors.card }]}>
               <Text style={[styles.finLabel, { color: colors.mutedFg }]}>{t('revenue')}</Text>
               <Text style={[styles.finValue, { color: '#16A34A' }]}>
-                ₹{cropFinancials.income.toLocaleString('en-IN')}
+                {fmtCurrency(cropFinancials.income)}
               </Text>
             </View>
             <View style={[styles.finItem, styles.finCard, { backgroundColor: colors.card }]}>
               <Text style={[styles.finLabel, { color: colors.mutedFg }]}>{t('expenses')}</Text>
               <Text style={[styles.finValue, { color: '#DC2626' }]}>
-                ₹{cropFinancials.expenses.toLocaleString('en-IN')}
+                {fmtCurrency(cropFinancials.expenses)}
               </Text>
             </View>
             <View style={[styles.finItem, styles.finCard, { backgroundColor: colors.card }]}>
@@ -165,7 +166,7 @@ export function CropDashboardScreen({ route, navigation }: any) {
               <Text
                 style={[styles.finValue, { color: cropFinancials.profit >= 0 ? '#16A34A' : '#DC2626' }]}
               >
-                ₹{cropFinancials.profit.toLocaleString('en-IN')}
+                {fmtCurrency(cropFinancials.profit)}
               </Text>
             </View>
           </View>
@@ -212,7 +213,7 @@ export function CropDashboardScreen({ route, navigation }: any) {
             <View style={[styles.detailRow, { borderBottomWidth: 0 }]}>
               <Text style={{ color: colors.mutedFg }}>{t('actualYield')}</Text>
               <Text style={{ color: colors.primary, fontWeight: '700' }}>
-                {crop.actualYield} {crop.actualYieldUnit ? (t(crop.actualYieldUnit.toLowerCase()) || crop.actualYieldUnit) : t('quintal')}
+                {toNative(crop.actualYield)} {crop.actualYieldUnit ? (t(crop.actualYieldUnit.toLowerCase()) || crop.actualYieldUnit) : t('quintal')}
               </Text>
             </View>
           )}

@@ -10,11 +10,13 @@ import { Badge } from '../../../components/ui/Badge';
 import { AddPlotModal } from '../components/AddPlotModal';
 import { Layers, Droplets, Sparkles, Plus } from 'lucide-react-native';
 import { WaveHeader } from '../../../components/ui/WaveHeader';
+import { useLocalizedFormat } from '../../../shared/hooks/useLocalizedFormat';
 
 export function PlotListScreen({ navigation }: any) {
   const { t, i18n } = useTranslation();
   const { colors } = useTheme();
   const { plots, fetchPlots, isLoading } = usePlotStore();
+  const { toNative } = useLocalizedFormat();
   const [addVisible, setAddVisible] = useState(false);
 
   useEffect(() => {
@@ -41,11 +43,12 @@ export function PlotListScreen({ navigation }: any) {
         refreshing={isLoading}
         onRefresh={fetchPlots}
         ListHeaderComponent={
-          <View style={{ marginBottom: 8 }}>
+          <View style={{ marginTop: 14, marginBottom: 10, alignItems: 'center' }}>
             <Button
               title={`+ ${t('addPlot')}`}
               onPress={() => setAddVisible(true)}
-              fullWidth
+              size="sm"
+              style={{ paddingHorizontal: 28 }}
             />
           </View>
         }
@@ -65,11 +68,11 @@ export function PlotListScreen({ navigation }: any) {
               <View style={styles.plotCardHeader}>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.plotName, { color: colors.foreground }]}>
-                    {plot.name || `${t('plots')} #${plot.gatNumber}`}
+                    {plot.name || `${t('plots')} #${toNative(plot.gatNumber)}`}
                   </Text>
                   <Text style={[styles.plotAreaSub, { color: colors.primary }]}>
-                    {plot.name ? `${t('gatNumber')}: ${plot.gatNumber} | ` : ''}
-                    {plot.area} {t(plot.areaUnit || 'acre')}
+                    {plot.name ? `${t('gatNumber')}: ${toNative(plot.gatNumber)} | ` : ''}
+                    {toNative(plot.area)} {t(plot.areaUnit || 'acre')}
                   </Text>
                 </View>
               </View>

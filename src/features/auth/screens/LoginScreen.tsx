@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert, Dimensions, Modal } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../app/providers/ThemeProvider';
 import { useAuthStore } from '../../../shared/hooks/useAuthStore';
@@ -7,6 +7,7 @@ import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { SUPPORTED_LANGUAGES } from '../../../shared/locales/i18n';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const WAVE_HEIGHT = 220;
@@ -30,12 +31,9 @@ export function LoginScreen({ navigation }: any) {
   const [step, setStep] = useState<'mobile' | 'otp'>('mobile');
   const [loginError, setLoginError] = useState('');
 
-  const isMr = i18n.language === 'mr';
+  const [langPickerOpen, setLangPickerOpen] = useState(false);
 
-  const toggleLanguage = () => {
-    const newLang = isMr ? 'en' : 'mr';
-    i18n.changeLanguage(newLang);
-  };
+  const currentLangLabel = SUPPORTED_LANGUAGES.find(l => l.code === i18n.language)?.nativeLabel || 'English';
 
   const handleRequestOtp = async () => {
     if (mobile.length !== 10) return;
@@ -91,9 +89,9 @@ export function LoginScreen({ navigation }: any) {
             opacity={0.3}
           />
         </Svg>
-        <TouchableOpacity onPress={toggleLanguage} style={styles.langBtn}>
+        <TouchableOpacity onPress={() => setLangPickerOpen(true)} style={styles.langBtn}>
           <Text style={[styles.langText, { color: '#FFFFFF' }]}>
-            {isMr ? 'EN' : 'मरा'}
+            {currentLangLabel}
           </Text>
         </TouchableOpacity>
         <View style={styles.waveLogoWrap}>
@@ -191,6 +189,46 @@ export function LoginScreen({ navigation }: any) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <Modal visible={langPickerOpen} transparent animationType="fade">
+        <TouchableOpacity
+          style={styles.langModalOverlay}
+          activeOpacity={1}
+          onPress={() => setLangPickerOpen(false)}
+        >
+          <View style={[styles.langModalCard, { backgroundColor: colors.card }]}>
+            <Text style={[styles.langModalTitle, { color: colors.foreground }]}>{t('language')}</Text>
+            <View style={styles.langModalGrid}>
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <TouchableOpacity
+                  key={lang.code}
+                  onPress={() => {
+                    i18n.changeLanguage(lang.code);
+                    setLangPickerOpen(false);
+                  }}
+                  style={[
+                    styles.langModalBtn,
+                    {
+                      borderColor: i18n.language === lang.code ? colors.primary : colors.border,
+                      backgroundColor: i18n.language === lang.code ? colors.primary + '15' : colors.card,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={{
+                      color: i18n.language === lang.code ? colors.primary : colors.foreground,
+                      fontWeight: '700',
+                      fontSize: 15,
+                    }}
+                  >
+                    {lang.nativeLabel}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -213,4 +251,9 @@ const styles = StyleSheet.create({
   line: { flex: 1, height: 1 },
   orText: { marginHorizontal: 12, fontSize: 13 },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 16 },
+  langModalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+  langModalCard: { width: '100%', maxWidth: 380, borderRadius: 16, padding: 20 },
+  langModalTitle: { fontSize: 17, fontWeight: '700', marginBottom: 14, textAlign: 'center' },
+  langModalGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  langModalBtn: { width: '30%', flexGrow: 1, paddingVertical: 12, alignItems: 'center', borderWidth: 1.5, borderRadius: 10 },
 });

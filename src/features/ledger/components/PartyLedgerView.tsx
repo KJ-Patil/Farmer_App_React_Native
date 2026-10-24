@@ -18,7 +18,8 @@ import { Badge } from '../../../components/ui/Badge';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
-import { fmtDMY } from '../../../shared/utils/helpers';
+import { useLocalizedFormat } from '../../../shared/hooks/useLocalizedFormat';
+import { tCategory, tPaymentMode } from '../../../shared/utils/helpers';
 import type { PaymentMode } from '../../../shared/types/ledger';
 import {
   Users,
@@ -47,6 +48,7 @@ export function PartyLedgerView() {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { transactions, customLedgers, createTransaction, recordCreditPayment } = useLedgerStore();
+  const { fmtCurrency, toNative, fmtDMY } = useLocalizedFormat();
 
   const [selectedPartyName, setSelectedPartyName] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -207,7 +209,7 @@ export function PartyLedgerView() {
     }
   };
 
-  const fmt = (v: number) => `₹${Math.round(v).toLocaleString('en-IN')}`;
+  const fmt = (v: number) => fmtCurrency(Math.round(v));
 
   // If a single party is selected, show Statement View
   if (selectedPartyName && activeParty) {
@@ -299,7 +301,7 @@ export function PartyLedgerView() {
               </Card>
 
               <Text style={{ color: colors.foreground, fontSize: 14, fontWeight: '700', marginTop: 16, marginBottom: 8 }}>
-                {t('transactionsStatement')} ({partyTransactions.length})
+                {t('transactionsStatement')} ({toNative(partyTransactions.length)})
               </Text>
             </View>
           }
@@ -313,10 +315,10 @@ export function PartyLedgerView() {
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 13 }}>
-                    {tx.category || (tx.type === 'expense' ? t('purchase') : t('payment'))}
+                    {tx.category ? tCategory(tx.category, t) : (tx.type === 'expense' ? t('purchase') : t('payment'))}
                   </Text>
                   <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
-                    {fmtDMY(tx.date)} • {tx.paymentMode?.toUpperCase()}
+                    {fmtDMY(tx.date)} • {tPaymentMode(tx.paymentMode, t)}
                     {tx.billNumber ? ` • #${tx.billNumber}` : ''}
                   </Text>
                   {tx.notes && (
@@ -337,7 +339,7 @@ export function PartyLedgerView() {
                     {tx.type === 'expense' ? '-' : '+'}{fmt(tx.amount)}
                   </Text>
                   <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
-                    Bal: {fmt(Math.abs(tx.runningBalance))}
+                    {t('balance')}: {fmt(Math.abs(tx.runningBalance))}
                   </Text>
                 </View>
               </View>
@@ -450,7 +452,7 @@ export function PartyLedgerView() {
                       fontSize: 12,
                     }}
                   >
-                    {mode.toUpperCase()}
+                    {t(mode)}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -510,7 +512,7 @@ export function PartyLedgerView() {
                 <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>
                   {t('totalParties')}
                 </Text>
-                <Text style={[styles.kpiVal, { color: colors.foreground }]}>{partiesList.length}</Text>
+                <Text style={[styles.kpiVal, { color: colors.foreground }]}>{toNative(partiesList.length)}</Text>
               </View>
 
               <View style={[styles.kpiCard, { backgroundColor: colors.card }]}>
@@ -563,9 +565,9 @@ export function PartyLedgerView() {
                       {party.name}
                     </Text>
                     <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
-                      {party.txCount} {t('transactionsCount')}
+                      {toNative(party.txCount)} {t('transactionsCount')}
                       {party.phone ? ` • 📞 ${party.phone}` : ''}
-                      {party.lastDate ? ` • ${party.lastDate}` : ''}
+                      {party.lastDate ? ` • ${fmtDMY(party.lastDate)}` : ''}
                     </Text>
                     {party.pendingCreditDue > 0 && (
                       <Text style={{ color: colors.warning, fontSize: 13, fontWeight: '700', marginTop: 2 }}>

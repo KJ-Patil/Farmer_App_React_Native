@@ -68,6 +68,7 @@ export default {
   membership: 'सदस्यत्व',
   free: 'मोफत',
   gold: 'गोल्ड',
+  premium: 'प्रीमियम',
 
   // Navigation
   dashboard: 'डॅशबोर्ड',
@@ -355,6 +356,11 @@ export default {
   itemName: 'आयटम नाव',
   itemNameMr: 'आयटम नाव (मराठी)',
   unit: 'एकक',
+  kg: 'किलो',
+  litre: 'लिटर',
+  bag: 'बॅग',
+  packet: 'पॅकेट',
+  bottle: 'बाटली',
   rate: 'दर',
   supplier: 'पुरवठादार',
   totalValue: 'एकूण मूल्य',
@@ -415,6 +421,7 @@ export default {
   total: 'एकूण',
   today: 'आज',
   general: 'सामान्य',
+  direct: 'प्रत्यक्ष',
   generalFarmer: 'सामान्य शेतकरी',
   generalSupplier: 'सामान्य पुरवठादार',
   margin: 'मार्जिन',
@@ -619,4 +626,20 @@ export default {
   goldAccount: 'गोल्ड खाते',
   freeAccount: 'फ्री खाते',
   loginFailed: 'लॉगिन अयशस्वी. कृपया पुन्हा प्रयत्न करा.',
+
+  // Subscription
+  subscriptionPlan: 'सदस्यता योजना',
+  choosePlanDesc: 'तुमच्या शेतीच्या गरजेनुसार योजना निवडा',
+  planUpdated: 'योजना यशस्वीरीत्या अपडेट झाली',
+  freeFeatures: 'मूलभूत सुविधा, मर्यादित अहवाल',
+  goldFeatures: 'सर्व अहवाल, व्हॉट्सअॅप शेअर, पार्टी खातेवही',
+  premiumFeatures: 'एआय विश्लेषण, प्राधान्य सहाय्य, सर्व सुविधा',
+  active: 'सक्रिय',
+  upgradePlan: 'योजना अपग्रेड करा',
+  confirmUpgrade: 'अपग्रेड करा',
+  upgrade: 'अपग्रेड',
+  month: 'महिना',
+  balance: 'शिल्लक',
+  next4Days: 'पुढील ४ दिवस',
+  past7Days: 'मागील ७ दिवस',
 };

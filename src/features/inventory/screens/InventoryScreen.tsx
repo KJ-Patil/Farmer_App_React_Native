@@ -12,7 +12,8 @@ import { IssueToCropModal } from '../components/IssueToCropModal';
 import { AddCustomItemModal } from '../components/AddCustomItemModal';
 import { Package, ShoppingCart, TrendingDown, Plus, Search, LayoutList } from 'lucide-react-native';
 import { WaveHeader } from '../../../components/ui/WaveHeader';
-import { fmtDMY } from '../../../shared/utils/helpers';
+import { useLocalizedFormat } from '../../../shared/hooks/useLocalizedFormat';
+import { tPaymentMode } from '../../../shared/utils/helpers';
 
 type TabKey = 'stock' | 'purchase' | 'issues' | 'master';
 const ITEM_TYPES = ['all', 'fertilizer', 'seed', 'pesticide', 'other'] as const;
@@ -30,7 +31,8 @@ export function InventoryScreen() {
   const [selectedType, setSelectedType] = useState<string>('all');
   const [search, setSearch] = useState('');
 
-  const isMr = i18n.language === 'mr';
+  const isNonEnglish = i18n.language !== 'en';
+  const { fmtCurrency, toNative, fmtDMY } = useLocalizedFormat();
 
   useEffect(() => {
     fetchItems();
@@ -114,9 +116,9 @@ export function InventoryScreen() {
       <WaveHeader
         title={t('inventory')}
         stats={[
-          { value: `₹${summaryMetrics.totalStockValue.toLocaleString('en-IN')}`, label: t('stock') || 'Stock' },
-          { value: summaryMetrics.inStockCount, label: t('itemsInStock') || 'In Stock' },
-          { value: summaryMetrics.outOfStockCount, label: t('outOfStock') || 'Out' },
+          { value: fmtCurrency(summaryMetrics.totalStockValue), label: t('stock') || 'Stock' },
+          { value: toNative(summaryMetrics.inStockCount), label: t('itemsInStock') || 'In Stock' },
+          { value: toNative(summaryMetrics.outOfStockCount), label: t('outOfStock') || 'Out' },
         ]}
         gradientFrom="#7C3AED"
         gradientTo="#5B21B6"
@@ -178,11 +180,11 @@ export function InventoryScreen() {
                       <Package color="#2563EB" size={18} />
                     </View>
                     <Text style={[styles.kpiValue, { color: colors.foreground }]}>
-                      ₹{summaryMetrics.totalStockValue.toLocaleString('en-IN')}
+                      {fmtCurrency(summaryMetrics.totalStockValue)}
                     </Text>
                     <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>{t('totalStockValue')}</Text>
                     <Text style={[styles.kpiSub, { color: '#2563EB' }]}>
-                      {summaryMetrics.inStockCount} {t('itemsInStock')}
+                      {toNative(summaryMetrics.inStockCount)} {t('itemsInStock')}
                     </Text>
                   </View>
 
@@ -191,11 +193,11 @@ export function InventoryScreen() {
                       <ShoppingCart color="#16A34A" size={18} />
                     </View>
                     <Text style={[styles.kpiValue, { color: colors.foreground }]}>
-                      ₹{summaryMetrics.monthPurchasesTotal.toLocaleString('en-IN')}
+                      {fmtCurrency(summaryMetrics.monthPurchasesTotal)}
                     </Text>
                     <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>{t('monthlyPurchases')}</Text>
                     <Text style={[styles.kpiSub, { color: '#16A34A' }]}>
-                      {purchases.length} {t('purchasesCount')}
+                      {toNative(purchases.length)} {t('purchasesCount')}
                     </Text>
                   </View>
 
@@ -204,11 +206,11 @@ export function InventoryScreen() {
                       <TrendingDown color="#EA580C" size={18} />
                     </View>
                     <Text style={[styles.kpiValue, { color: colors.foreground }]}>
-                      ₹{summaryMetrics.monthIssuedTotal.toLocaleString('en-IN')}
+                      {fmtCurrency(summaryMetrics.monthIssuedTotal)}
                     </Text>
                     <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>{t('issuedToCrops')}</Text>
                     <Text style={[styles.kpiSub, { color: '#EA580C' }]}>
-                      {consumptions.length} {t('issuesCount')}
+                      {toNative(consumptions.length)} {t('issuesCount')}
                     </Text>
                   </View>
 
@@ -217,11 +219,11 @@ export function InventoryScreen() {
                       <Package color="#64748B" size={18} />
                     </View>
                     <Text style={[styles.kpiValue, { color: colors.foreground }]}>
-                      {summaryMetrics.totalItemsCount}
+                      {toNative(summaryMetrics.totalItemsCount)}
                     </Text>
                     <Text style={[styles.kpiLabel, { color: colors.mutedFg }]}>{t('stockHealth')}</Text>
                     <Text style={[styles.kpiSub, { color: '#D97706' }]}>
-                      {summaryMetrics.outOfStockCount} {t('outOfStock')}
+                      {toNative(summaryMetrics.outOfStockCount)} {t('outOfStock')}
                     </Text>
                   </View>
                 </View>
@@ -303,10 +305,10 @@ export function InventoryScreen() {
                 <View style={styles.row}>
                   <View style={{ flex: 1, marginRight: 10 }}>
                     <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 14 }}>
-                      {isMr && item.nameMr ? item.nameMr : item.name}
+                      {isNonEnglish && item.nameMr ? item.nameMr : item.name}
                     </Text>
                     <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
-                      {item.nameMr && !isMr ? item.nameMr : item.notes || ''}
+                      {item.nameMr && !isNonEnglish ? item.nameMr : item.notes || ''}
                     </Text>
                     <View style={{ marginTop: 4 }}>
                       <Badge text={t(item.type) || item.type} variant="info" />
@@ -320,13 +322,13 @@ export function InventoryScreen() {
                         fontSize: 16,
                       }}
                     >
-                      {item.currentStock || 0} {item.unit}
+                      {toNative(item.currentStock || 0)} {t(item.unit)}
                     </Text>
                     <Text style={{ color: colors.mutedFg, fontSize: 12, marginTop: 2 }}>
-                      ₹{item.purchaseRate || 0}/{item.unit}
+                      {fmtCurrency(item.purchaseRate || 0)}/{t(item.unit)}
                     </Text>
                     <Text style={{ color: colors.primary, fontSize: 14, fontWeight: '700', marginTop: 1 }}>
-                      ₹{((item.currentStock || 0) * (item.purchaseRate || 0)).toLocaleString('en-IN')}
+                      {fmtCurrency((item.currentStock || 0) * (item.purchaseRate || 0))}
                     </Text>
                   </View>
                 </View>
@@ -385,14 +387,14 @@ export function InventoryScreen() {
                       {fmtDMY(p.date)} • {p.supplierName || t('generalSupplier')}
                     </Text>
                     <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 1 }}>
-                      {p.quantity} × ₹{p.rate}
+                      {toNative(p.quantity)} × {fmtCurrency(p.rate || 0)}
                     </Text>
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <Text style={{ color: colors.foreground, fontWeight: '800', fontSize: 15 }}>
-                      ₹{p.totalAmount?.toLocaleString('en-IN')}
+                      {fmtCurrency(p.totalAmount || 0)}
                     </Text>
-                    <Badge text={(p.paymentMode || 'cash').toUpperCase()} />
+                    <Badge text={tPaymentMode(p.paymentMode, t)} />
                   </View>
                 </View>
               </Card>
@@ -436,7 +438,7 @@ export function InventoryScreen() {
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <Text style={{ color: colors.primary, fontWeight: '800', fontSize: 15 }}>
-                      {c.quantity} {c.unit}
+                      {toNative(c.quantity)} {c.unit ? t(c.unit) : ''}
                     </Text>
                   </View>
                 </View>
@@ -465,9 +467,9 @@ export function InventoryScreen() {
                 <View style={styles.row}>
                   <View style={{ flex: 1, marginRight: 8 }}>
                     <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 14 }}>
-                      {isMr && item.nameMr ? item.nameMr : item.name}
+                      {isNonEnglish && item.nameMr ? item.nameMr : item.name}
                     </Text>
-                    {item.nameMr && !isMr ? (
+                    {item.nameMr && !isNonEnglish ? (
                       <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 1 }}>{item.nameMr}</Text>
                     ) : null}
                     {item.notes ? (
@@ -478,10 +480,10 @@ export function InventoryScreen() {
                 </View>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border, paddingTop: 8, marginTop: 8 }}>
                   <Text style={{ color: colors.mutedFg, fontSize: 12 }}>
-                    {t('rate')}: ₹{item.purchaseRate || 0}/{item.unit}
+                    {t('rate')}: {fmtCurrency(item.purchaseRate || 0)}/{t(item.unit)}
                   </Text>
                   <Text style={{ color: (item.currentStock || 0) > 0 ? colors.primary : colors.destructive, fontWeight: '700', fontSize: 12 }}>
-                    {t('stock')}: {item.currentStock || 0} {item.unit}
+                    {t('stock')}: {toNative(item.currentStock || 0)} {t(item.unit)}
                   </Text>
                 </View>
               </Card>

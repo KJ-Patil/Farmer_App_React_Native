@@ -182,7 +182,7 @@ export function MoneyOutModal({ visible, onClose, initialData, plotId, cropId }:
                           onPress={() => setSelectedCropId(c.id)}
                           style={[styles.chip, { borderColor: selectedCropId === c.id ? colors.primary : colors.border, backgroundColor: selectedCropId === c.id ? colors.primary + '15' : colors.card, borderRadius: 8 }]}
                         >
-                          <Text style={{ color: selectedCropId === c.id ? colors.primary : colors.foreground, fontWeight: '600', fontSize: 12 }}>{c.cropType}</Text>
+                          <Text style={{ color: selectedCropId === c.id ? colors.primary : colors.foreground, fontWeight: '600', fontSize: 12 }}>{t(c.cropType)}</Text>
                         </TouchableOpacity>
                       ))}
                     </View>

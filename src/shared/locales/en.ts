@@ -68,6 +68,7 @@ export default {
   membership: 'Membership',
   free: 'Free',
   gold: 'Gold',
+  premium: 'Premium',
 
   // Navigation
   dashboard: 'Dashboard',
@@ -355,6 +356,11 @@ export default {
   itemName: 'Item Name',
   itemNameMr: 'Item Name (Marathi)',
   unit: 'Unit',
+  kg: 'kg',
+  litre: 'Litre',
+  bag: 'Bag',
+  packet: 'Packet',
+  bottle: 'Bottle',
   rate: 'Rate',
   supplier: 'Supplier',
   totalValue: 'Total Value',
@@ -415,6 +421,7 @@ export default {
   total: 'Total',
   today: 'Today',
   general: 'General',
+  direct: 'Direct',
   generalFarmer: 'General Farmer',
   generalSupplier: 'General Supplier',
   margin: 'margin',
@@ -619,4 +626,22 @@ export default {
   goldAccount: 'Gold Account',
   freeAccount: 'Free Account',
   loginFailed: 'Login failed. Please try again.',
+
+  // Subscription
+  subscriptionPlan: 'Subscription Plan',
+  choosePlanDesc: 'Choose a plan that suits your farming needs',
+  planUpdated: 'Plan updated successfully',
+  freeFeatures: 'Basic features, limited reports',
+  goldFeatures: 'Full reports, WhatsApp share, party ledger',
+  premiumFeatures: 'AI insights, priority support, all features',
+  active: 'Active',
+  upgradePlan: 'Upgrade Plan',
+  confirmUpgrade: 'Upgrade to',
+  upgrade: 'Upgrade',
+  month: 'month',
+
+  // Additional localization keys
+  balance: 'Bal',
+  next4Days: 'NEXT 4 DAYS',
+  past7Days: 'PAST 7 DAYS',
 };

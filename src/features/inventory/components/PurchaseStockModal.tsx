@@ -7,6 +7,7 @@ import { Input } from '../../../components/ui/Input';
 import { Button } from '../../../components/ui/Button';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
 import type { PaymentMode } from '../../../shared/types/ledger';
+import { useLocalizedFormat } from '../../../shared/hooks/useLocalizedFormat';
 
 interface PurchaseStockModalProps {
   visible: boolean;
@@ -20,7 +21,8 @@ export function PurchaseStockModal({ visible, onClose, initialItemId }: Purchase
   const { t, i18n } = useTranslation();
   const { colors } = useTheme();
   const { items, purchaseStock } = useInventoryStore();
-  const isMr = i18n.language === 'mr';
+  const isNonEnglish = i18n.language !== 'en';
+  const { fmtCurrency, toNative } = useLocalizedFormat();
 
   const [loading, setLoading] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState(initialItemId || '');
@@ -92,7 +94,7 @@ export function PurchaseStockModal({ visible, onClose, initialItemId }: Purchase
                 style={[styles.chip, { borderColor: selectedItemId === item.id ? colors.primary : colors.border, backgroundColor: selectedItemId === item.id ? colors.primary + '15' : colors.card, borderRadius: 8 }]}
               >
                 <Text style={{ color: selectedItemId === item.id ? colors.primary : colors.foreground, fontWeight: '600', fontSize: 12 }}>
-                  {isMr && item.nameMr ? item.nameMr : item.name}
+                  {isNonEnglish && item.nameMr ? item.nameMr : item.name}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -100,16 +102,16 @@ export function PurchaseStockModal({ visible, onClose, initialItemId }: Purchase
 
           {selectedItem && (
             <Text style={{ color: colors.mutedFg, fontSize: 12, marginBottom: 12 }}>
-              {t('currentStock')}: {selectedItem.currentStock} {selectedItem.unit}
+              {t('currentStock')}: {toNative(selectedItem.currentStock)} {t(selectedItem.unit)}
             </Text>
           )}
 
-          <Input label={`${t('quantity')} (${selectedItem?.unit || ''})`} value={quantity} onChangeText={(v) => setQuantity(v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" />
-          <Input label={`${t('rate')} / ${selectedItem?.unit || t('unit')}`} value={rate} onChangeText={(v) => setRate(v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" />
+          <Input label={`${t('quantity')} (${selectedItem?.unit ? t(selectedItem.unit) : ''})`} value={quantity} onChangeText={(v) => setQuantity(v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" />
+          <Input label={`${t('rate')} / ${selectedItem?.unit ? t(selectedItem.unit) : t('unit')}`} value={rate} onChangeText={(v) => setRate(v.replace(/[^0-9.]/g, ''))} keyboardType="decimal-pad" />
 
           {total > 0 && (
             <Text style={{ color: colors.primary, fontSize: 18, fontWeight: '700', marginBottom: 16 }}>
-              {t('total')}: ₹{total.toLocaleString('en-IN')}
+              {t('total')}: {fmtCurrency(total)}
             </Text>
           )}
 

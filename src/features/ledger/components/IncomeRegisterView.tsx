@@ -19,7 +19,8 @@ import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { DatePickerInput } from '../../../components/ui/DatePickerInput';
 import type { Transaction, PaymentMode } from '../../../shared/types/ledger';
-import { fmtDMY } from '../../../shared/utils/helpers';
+import { useLocalizedFormat } from '../../../shared/hooks/useLocalizedFormat';
+import { tCategory, tPaymentMode } from '../../../shared/utils/helpers';
 import {
   TrendingUp,
   Sprout,
@@ -44,6 +45,7 @@ export function IncomeRegisterView({ onOpenMoneyInModal }: IncomeRegisterViewPro
   const { t } = useTranslation();
   const { colors } = useTheme();
   const { transactions, deleteTransaction, recordLoanEmiPayment } = useLedgerStore();
+  const { fmtCurrency, toNative, fmtDMY } = useLocalizedFormat();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('all');
@@ -194,7 +196,7 @@ export function IncomeRegisterView({ onOpenMoneyInModal }: IncomeRegisterViewPro
     );
   };
 
-  const fmt = (v: number) => `₹${Math.round(v).toLocaleString('en-IN')}`;
+  const fmt = (v: number) => fmtCurrency(Math.round(v));
 
   return (
     <View style={{ flex: 1 }}>
@@ -260,7 +262,7 @@ export function IncomeRegisterView({ onOpenMoneyInModal }: IncomeRegisterViewPro
                       {t('activeLoansAndEmi')}
                     </Text>
                   </View>
-                  <Badge text={`${activeLoans.length} ${t('loansCount')}`} variant="warning" />
+                  <Badge text={`${toNative(activeLoans.length)} ${t('loansCount')}`} variant="warning" />
                 </View>
 
                 {activeLoans.map((loan) => {
@@ -278,11 +280,11 @@ export function IncomeRegisterView({ onOpenMoneyInModal }: IncomeRegisterViewPro
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <View style={{ flex: 1 }}>
                           <Text style={{ color: colors.foreground, fontWeight: '700', fontSize: 13 }}>
-                            {loan.partyName || loan.category}
+                            {loan.partyName || tCategory(loan.category, t)}
                           </Text>
                           <Text style={{ color: colors.mutedFg, fontSize: 13, marginTop: 2 }}>
                             {loan.loanDetails?.loanType || t('bankLoan')}
-                            {loan.loanDetails?.interestRate ? ` • ${loan.loanDetails.interestRate}%` : ''}
+                            {loan.loanDetails?.interestRate ? ` • ${toNative(loan.loanDetails.interestRate)}%` : ''}
                           </Text>
                         </View>
                         <View style={{ alignItems: 'flex-end' }}>
@@ -309,7 +311,7 @@ export function IncomeRegisterView({ onOpenMoneyInModal }: IncomeRegisterViewPro
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                           <Calendar color={colors.mutedFg} size={12} />
                           <Text style={{ color: isOverdue ? colors.destructive : colors.mutedFg, fontSize: 13, fontWeight: '600' }}>
-                            {loan.dueDate || loan.loanDetails?.firstInstallmentDate || '—'}
+                            {fmtDMY(loan.dueDate || loan.loanDetails?.firstInstallmentDate) || '—'}
                           </Text>
                         </View>
 
@@ -411,10 +413,10 @@ export function IncomeRegisterView({ onOpenMoneyInModal }: IncomeRegisterViewPro
                 <View style={{ flex: 1, marginLeft: 10 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                     <Text style={[styles.txnTitle, { color: colors.foreground }]}>
-                      {tx.cropName ? `${tx.cropName} ${t('sale')}` : tx.category}
+                      {tx.cropName ? `${t(tx.cropName)} ${t('sale')}` : tCategory(tx.category, t)}
                     </Text>
                     <Badge
-                      text={tx.paymentMode?.toUpperCase() || 'CASH'}
+                      text={tPaymentMode(tx.paymentMode, t)}
                       variant={tx.paymentMode === 'cash' ? 'default' : 'info'}
                     />
                     {tx.billNumber && <Badge text={`#${tx.billNumber}`} variant="default" />}
@@ -481,7 +483,7 @@ export function IncomeRegisterView({ onOpenMoneyInModal }: IncomeRegisterViewPro
               </View>
 
               <Text style={{ color: colors.mutedFg, fontSize: 12, marginBottom: 12 }}>
-                {selectedLoanTx.partyName || selectedLoanTx.category} •{' '}
+                {selectedLoanTx.partyName || tCategory(selectedLoanTx.category, t)} •{' '}
                 {t('outstanding')}:{' '}
                 <Text style={{ fontWeight: '700', color: colors.destructive }}>
                   {fmt(selectedLoanTx.pendingAmount ?? selectedLoanTx.amount)}
@@ -525,7 +527,7 @@ export function IncomeRegisterView({ onOpenMoneyInModal }: IncomeRegisterViewPro
                         fontSize: 12,
                       }}
                     >
-                      {mode.toUpperCase()}
+                      {t(mode)}
                     </Text>
                   </TouchableOpacity>
                 ))}
