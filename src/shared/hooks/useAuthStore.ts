@@ -24,6 +24,7 @@ import { auth, db } from '../services/firebase';
 import { UserProfile } from '../types/auth';
 import { logger } from '../services/logger';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAppStore } from './useAppStore';
 
 interface AuthStore {
   user: UserProfile | null;
@@ -92,25 +93,38 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
           if (!mobile && firebaseUser.phoneNumber) {
             mobile = firebaseUser.phoneNumber.replace(/\D/g, '').slice(-10);
           }
+
+          // Try cached profile first for instant load
+          const saved = await AsyncStorage.getItem('farmer_active_user');
+          let cachedProfile: UserProfile | null = null;
+          if (saved) {
+            try { cachedProfile = JSON.parse(saved); } catch {}
+          }
+
           if (mobile) {
-            const profile = await get().fetchUserProfile(mobile);
-            if (profile) {
-              await AsyncStorage.setItem('farmer_active_user', JSON.stringify(profile));
-              set({ user: profile, isLoading: false, isInitialized: true });
-              return;
+            // If online, refresh from Firestore; otherwise use cache
+            const { isOnline } = useAppStore.getState();
+            if (isOnline) {
+              try {
+                const profile = await get().fetchUserProfile(mobile);
+                if (profile) {
+                  await AsyncStorage.setItem('farmer_active_user', JSON.stringify(profile));
+                  set({ user: profile, isLoading: false, isInitialized: true });
+                  return;
+                }
+              } catch (fetchErr) {
+                logger.warn('Could not fetch profile from server, using cache:', fetchErr);
+              }
             }
           }
-          const saved = await AsyncStorage.getItem('farmer_active_user');
-          if (saved) {
-            try {
-              const profile = JSON.parse(saved);
-              set({ user: profile, isLoading: false, isInitialized: true });
-              return;
-            } catch {}
+
+          if (cachedProfile) {
+            set({ user: cachedProfile, isLoading: false, isInitialized: true });
+            return;
           }
           set({ isLoading: false, isInitialized: true });
         } catch (err) {
-          logger.error('Failed to fetch user profile:', err);
+          logger.warn('Auth listener error, falling back to cache:', err);
           const saved = await AsyncStorage.getItem('farmer_active_user');
           if (saved) {
             try {

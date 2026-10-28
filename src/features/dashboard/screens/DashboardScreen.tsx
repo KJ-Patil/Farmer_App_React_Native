@@ -8,7 +8,6 @@ import {
   Modal,
   Alert,
   useWindowDimensions,
-  Dimensions,
   StatusBar,
   Platform,
   TextInput,
@@ -30,7 +29,7 @@ import { Input } from '../../../components/ui/Input';
 import { AreaChart } from '../../../components/ui/AreaChart';
 import { useLocalizedFormat } from '../../../shared/hooks/useLocalizedFormat';
 import { tCategory, tPaymentMode } from '../../../shared/utils/helpers';
-import Svg, { Path, Defs, LinearGradient, Stop } from 'react-native-svg';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
   TrendingUp,
   Users,
@@ -55,9 +54,7 @@ import {
   Search as SearchIcon,
 } from 'lucide-react-native';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const STATUS_BAR_HEIGHT = StatusBar.currentHeight || 44;
-const WAVE_HEIGHT = 220;
 
 const CROPS_LIST = ['Wheat', 'Cotton', 'Soybean', 'Rice', 'Sugarcane'];
 
@@ -357,74 +354,55 @@ export function DashboardScreen({ navigation }: any) {
   return (
     <ScreenLayout noPadding noTopInset>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        {/* Wave Header */}
-        <View style={styles.waveContainer}>
-          <Svg width={SCREEN_WIDTH} height={WAVE_HEIGHT} viewBox={`0 0 ${SCREEN_WIDTH} ${WAVE_HEIGHT}`}>
-            <Defs>
-              <LinearGradient id="dashWaveGrad" x1="0" y1="0" x2="1" y2="1">
-                <Stop offset="0" stopColor="#16A34A" />
-                <Stop offset="1" stopColor="#0F766E" />
-              </LinearGradient>
-            </Defs>
-            <Path
-              d={`M0,0 L${SCREEN_WIDTH},0 L${SCREEN_WIDTH},${WAVE_HEIGHT * 0.7} Q${SCREEN_WIDTH * 0.75},${WAVE_HEIGHT * 0.95} ${SCREEN_WIDTH * 0.5},${WAVE_HEIGHT * 0.82} Q${SCREEN_WIDTH * 0.25},${WAVE_HEIGHT * 0.68} 0,${WAVE_HEIGHT * 0.88} Z`}
-              fill="url(#dashWaveGrad)"
-            />
-            <Path
-              d={`M0,0 L${SCREEN_WIDTH},0 L${SCREEN_WIDTH},${WAVE_HEIGHT * 0.6} Q${SCREEN_WIDTH * 0.65},${WAVE_HEIGHT * 0.85} ${SCREEN_WIDTH * 0.4},${WAVE_HEIGHT * 0.73} Q${SCREEN_WIDTH * 0.15},${WAVE_HEIGHT * 0.6} 0,${WAVE_HEIGHT * 0.78} Z`}
-              fill="#22C55E"
-              opacity={0.25}
-            />
-            <Path
-              d={`M0,0 L${SCREEN_WIDTH},0 L${SCREEN_WIDTH},${WAVE_HEIGHT * 0.5} Q${SCREEN_WIDTH * 0.55},${WAVE_HEIGHT * 0.72} ${SCREEN_WIDTH * 0.3},${WAVE_HEIGHT * 0.6} Q${SCREEN_WIDTH * 0.1},${WAVE_HEIGHT * 0.5} 0,${WAVE_HEIGHT * 0.65} Z`}
-              fill="#4ADE80"
-              opacity={0.15}
-            />
-          </Svg>
-          <View style={[styles.waveTextOverlay, { paddingTop: STATUS_BAR_HEIGHT + 12 }]}>
-            <View style={styles.greetingRow}>
-              <View style={styles.greetingLeft}>
-                <greeting.Icon size={20} color={greeting.iconColor} />
-                <Text style={styles.greetingText} numberOfLines={1}>
-                  {greeting.text}{firstName ? `, ${firstName}` : ''}
-                </Text>
-              </View>
-              {tempC != null && (
-                <TouchableOpacity
-                  onPress={() => setWeatherModalOpen(true)}
-                  activeOpacity={0.7}
-                  style={styles.tempBadge}
-                >
-                  {React.createElement(getWeatherInfo(weatherCode).Icon, { size: 16, color: '#FDE047' })}
-                  <View style={{ maxWidth: 72 }}>
-                    <Text style={styles.tempValue}>{Math.round(tempC)}°C</Text>
-                    <Text style={styles.tempSub} numberOfLines={1}>
-                      {weatherLocation?.name ? weatherLocation.name.split(',')[0].substring(0, 10) : `${Math.round(tempC * 9 / 5 + 32)}°F`}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              )}
+        {/* Gradient Header */}
+        <LinearGradient
+          colors={['#16A34A', '#0F766E']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[styles.headerContainer, { paddingTop: STATUS_BAR_HEIGHT + 12 }]}
+        >
+          <View style={styles.greetingRow}>
+            <View style={styles.greetingLeft}>
+              <greeting.Icon size={20} color={greeting.iconColor} />
+              <Text style={styles.greetingText} numberOfLines={1}>
+                {greeting.text}{firstName ? `, ${firstName}` : ''}
+              </Text>
             </View>
-            <Text style={styles.waveDate}>{todayFormatted}</Text>
+            {tempC != null && (
+              <TouchableOpacity
+                onPress={() => setWeatherModalOpen(true)}
+                activeOpacity={0.7}
+                style={styles.tempBadge}
+              >
+                {React.createElement(getWeatherInfo(weatherCode).Icon, { size: 16, color: '#FDE047' })}
+                <View style={{ maxWidth: 72 }}>
+                  <Text style={styles.tempValue}>{Math.round(tempC)}°C</Text>
+                  <Text style={styles.tempSub} numberOfLines={1}>
+                    {weatherLocation?.name ? weatherLocation.name.split(',')[0].substring(0, 10) : `${Math.round(tempC * 9 / 5 + 32)}°F`}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
+          </View>
+          <Text style={styles.waveDate}>{todayFormatted}</Text>
 
-            <View style={styles.waveStatRow}>
-              <View style={styles.waveStatItem}>
-                <Text style={styles.waveStatValue}>{formatC(totalRevenue)}</Text>
-                <Text style={styles.waveStatLabel}>{t('revenue')}</Text>
-              </View>
-              <View style={styles.waveStatDivider} />
-              <View style={styles.waveStatItem}>
-                <Text style={styles.waveStatValue}>{toNative(uniqueFarmers)}</Text>
-                <Text style={styles.waveStatLabel}>{t('farmers')}</Text>
-              </View>
-              <View style={styles.waveStatDivider} />
-              <View style={styles.waveStatItem}>
-                <Text style={styles.waveStatValue}>{toNative(transactions.length)}</Text>
-                <Text style={styles.waveStatLabel}>{t('entries')}</Text>
-              </View>
+          <View style={styles.waveStatRow}>
+            <View style={styles.waveStatItem}>
+              <Text style={styles.waveStatValue}>{formatC(totalRevenue)}</Text>
+              <Text style={styles.waveStatLabel}>{t('revenue')}</Text>
+            </View>
+            <View style={styles.waveStatDivider} />
+            <View style={styles.waveStatItem}>
+              <Text style={styles.waveStatValue}>{toNative(uniqueFarmers)}</Text>
+              <Text style={styles.waveStatLabel}>{t('farmers')}</Text>
+            </View>
+            <View style={styles.waveStatDivider} />
+            <View style={styles.waveStatItem}>
+              <Text style={styles.waveStatValue}>{toNative(transactions.length)}</Text>
+              <Text style={styles.waveStatLabel}>{t('entries')}</Text>
             </View>
           </View>
-        </View>
+        </LinearGradient>
 
         <View style={styles.contentPadding}>
 
@@ -844,8 +822,7 @@ export function DashboardScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   scroll: { paddingBottom: 100 },
-  waveContainer: { position: 'relative', width: '100%', height: WAVE_HEIGHT },
-  waveTextOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, paddingHorizontal: 20 },
+  headerContainer: { width: '100%', paddingHorizontal: 20, paddingBottom: 20, borderBottomLeftRadius: 28, borderBottomRightRadius: 28, overflow: 'hidden' },
   greetingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   greetingLeft: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, flexShrink: 1, minWidth: 0 },
   greetingText: { fontSize: 18, fontWeight: '700', color: '#FFFFFF', letterSpacing: -0.3, flexShrink: 1 },
@@ -868,7 +845,7 @@ const styles = StyleSheet.create({
   waveStatValue: { fontSize: 16, fontWeight: '800', color: '#FFFFFF', letterSpacing: -0.3 },
   waveStatLabel: { fontSize: 11, color: 'rgba(255,255,255,0.85)', marginTop: 2, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.3 },
   waveStatDivider: { width: 1, height: 28, backgroundColor: 'rgba(255,255,255,0.3)' },
-  contentPadding: { paddingHorizontal: 16, marginTop: -8 },
+  contentPadding: { paddingHorizontal: 16, marginTop: 16 },
   kpiGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 16 },
   kpiCard: { width: '48.5%' as any, marginBottom: 10, minHeight: 96, borderRadius: 24, padding: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 },
   kpiHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
